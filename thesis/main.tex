@@ -5,6 +5,7 @@
 \usepackage{wallpaper}
 \usepackage{palatino}
 \usepackage{graphicx}
+\usepackage{tikz}
 
 
 \input{styles/jenor}
@@ -28,15 +29,15 @@
 
 %\raggedbottom
 
-%\chapterstyle{ger}
-%\chapterstyle{ell}
-%\chapterstyle{companion}
-%\chapterstyle{hangnum}
-%\chapterstyle{lyhne}
-%\chapterstyle{madsen}
-\chapterstyle{jenor}
-%\chapterstyle{wilsondob}
-%\chapterstyle{hansen}
+% \chapterstyle{ger}
+% \chapterstyle{ell}
+% \chapterstyle{companion}
+% \chapterstyle{hangnum}
+% \chapterstyle{lyhne} % OKish
+% \chapterstyle{madsen} % OK
+% \chapterstyle{jenor} % Font too big
+% \chapterstyle{wilsondob}
+\chapterstyle{hansen} % OK
 
 %\maxsecnumdepth{subsection}
 
@@ -74,9 +75,9 @@
     \vspace*{-1cm}
     \textbf{\Huge Bachelor Thesis} \\
     \vspace*{2.5cm} \\
-    \textbf{\Huge Title} \\
+    \textbf{\Huge Cache optimizations in garbage collection} \\
     \vspace*{.1cm} \\
-    {\huge Subtitle} \\
+    {\huge Dynamically selecting cache-frindly object layouts} \\
     \begin{tabbing}
     % adjust the hspace below for the longest author name
     David Himmelstrup \hspace{1cm} \= \texttt{<vrs552@alumni.ku.dk>} \\
@@ -92,15 +93,129 @@
 
 \tableofcontents*
 
+\chapter*{Preface}
+
+Stuff here about the thesis.
+
 \chapter{Introduction}
-Blah
-\section{Section}
+\section{Processors, memory and cache}
 
-\chapter{Background}
-Blah
+CPUs used to run at similar frequencies as main memory, allowing them to read
+from memory at roughly the same speed that it could process the information.
+Sometimes programs has to process larger data sets than could fit into memory
+and parts of the data set would have to be swapped out of main memory and onto
+a disk or tape. A lot of caching research from that time was focused on how to
+manage the virtual memory using limited physical memory (which supports direct
+access with a constant latency) and a spinning disk drive (which requires seeking).
 
-\chapter{The LLVM Back-end}
-Blah
+In recent years CPUs have gotten a lot faster, the bandwidth of memory
+hasn't been able to keep pace and the memory latency has even gotten worse. This
+means that fetching data from memory can easily be the bottleneck when processing
+a data set. To solve this, several levels of memory caches were inserted closer
+to the CPU. These caches work in levels with the lowest levels being smallest
+and fastest. The caches have latencies that are roughly 100x to 10x quicker
+than main memory. The caches also have higher bandwidth than main memory but
+the benefit is less extreme here.
+
+The introduction of caches meant that memory fetches no longer completed in a
+constant amount of time because of the difference between a cache hit and
+a cache miss. Just as seen with spinning disks earlier, certain access patterns
+and data layouts can significantly improve performance. The canonical problems
+that highlights this is matrix multiplication: The elements of the resulting
+matrix can be computed in any order but choosing a cache-friendly access pattern
+can be orders of magnitude faster.
+
+% Write about MESI and cache associativity
+
+\section{Manual memory management}
+\section{Reference counting}
+\section{Mark-and-sweep}
+\section{Copying collectors}
+Cheney, depth-first collectors, hierarchical copy order
+\section{Related work}
+Depth-first copying (two approaches), immix, custom object layout
+\section{Haskell}
+\section{LHC}
+
+\chapter{Limited depth-first copying}
+
+\chapter{Tail-pointer elimination}
+
+\chapter{Evaluation}
+
+\chapter{Conclusion}
+
+% \chapter{Structure}
+% \begin{enumerate}
+%   \item Context (20\%): Motivate the problem (introduction, why should the reader care,
+%     what have other people done)
+%   \item Gap (10\%): Give the problem definition and what is missing from the current solutions
+%   \item Innovation (50\%): Give the key-idea/detailed methods/experiemnts and evaluation (in that order)
+%   \item (20\%) Talk about shortcomings of your approach, and future work, i.e. the conclusion.
+% \end{enumerate}
+%
+% Context:
+% \begin{enumerate}
+%   \item Sequential access is faster (due to cache)
+%   \item Breadth-first GC leads to non-sequential access
+%   \item People have tried to solve it with hierarchical copying
+%   \item Sequential data allows for pointers to be omitted
+% \end{enumerate}
+%
+% Gap:
+% \begin{enumerate}
+%   \item Copying GC
+%   \item Cheney's algorithm (zero stack, breadth-first ordering)
+%   \item Depth-first ordering
+%   \item Hierarchical ordering
+% \end{enumerate}
+%
+% Innovation:
+% \begin{enumerate}
+%   \item Mixed depth-first/breadth-first ordering
+%   \item Histogram of distances from parent to children.
+%   \item Tail-pointer elimination
+% \end{enumerate}
+%
+%
+% \chapter{Introduction}
+% Context (20\%): Motivate the problem (introduction, why should the reader care,
+% what have other people done)
+%
+% Motivate the problem: CPUs have gotten a lot faster than memory and caches have been
+% the answer, many modern languages use GC and copying can lead to better locality, locality is
+% important, copying GC can have better locality than mark-and-sweep,
+% describe cheney's algorithm, cheney not cache friendly because breadth-first,
+% some tried to solve it by doing depth-first, other's by hierarchical order, immix
+% (mixing copying and mark-sweep)
+% Changing data layouts can lead to big performance improvements (50\% fewer misses, 20\%
+% increased throughput)
+%
+% {section} cheney's algorithm is widely used but not very cache friendly.
+%
+% What does that reader need to know? GC, Semi-space GC, mark-and-sweep, cache
+% behavior.
+%
+% Why should the reader care? Cheney algorithm is not cache friendly. Cache friendly
+% access can be much faster.
+%
+% What have other people done? Depth-first copying, hierarchical copying, immix.
+%
+% \chapter{Gap}
+% Give the problem definition and what is missing from the current solutions
+
+\chapter{Tikz}
+Tikz trial:
+
+\begin{tikzpicture}
+  \draw[step=.5cm,gray,very thin] (-1.4,-1.4) grid (1.4,1.4);
+  \draw (-1.5,0) -- (1.5,0);
+  \draw (0,-1.5) -- (0,1.5);
+  \draw (0,0) circle [radius=1cm];
+  \fill[green!20!white, draw=green!50!black] (0,0) -- (3mm,0mm)
+    arc [start angle=0, end angle=30, radius=3mm] -- cycle;
+\end{tikzpicture}
+
 
 \end{document}
 %%  ==================================================================
