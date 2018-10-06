@@ -128,10 +128,55 @@ can be orders of magnitude faster.
 % Write about MESI and cache associativity
 
 \section{Manual memory management}
+Still widely used in low-level languages and on embedded systems.
+The onus is on the user to ensure correct usage.
+Modern languages are usually garbage collected (8/10 most popular langauges on
+github in 2017 were garbage collected).
+Manual management has low overhead and can finalize objects immediately when
+they're no longer used. This is important for limited resources such as file
+handlers, file locks, etc.
+Manual management often has more predictable performance without arbitrary pauses
+but performs less well in terms of throughput and locality.
+
 \section{Reference counting}
 \section{Mark-and-sweep}
+Unlike manual management and reference counting which never scans through all
+the heap allocated objects, tracing garbage collection involves finding all live
+heap objects by following a root set of objects out through all their children
+and children's children. Once all the live objects have been found, unused memory
+and resources can be reclaimed.
+The mark-and-sweep does exactly this in two phases: First all objects reachable
+from the root set are marked, then the "sweep" phases reclaims unused memory and
+releases unused OS resources.
+This algorithm correctly reclaims cyclic data structures when they're no longer
+referenced but, similarly to manual management and reference counting, leads to
+fragmentation and thus poor cache performance.
+
 \section{Copying collectors}
+In 1969, Fenichel et al published an algorithm for copying the reachable objects
+into newly allocated memory chunk rather than merely marking them. Once the copying
+is complete, all previously used memory will no longer contain live objects
+and can be reclaimed. This makes the "sweep" phases unnecessary and it gets rid
+of any fragmentation at the cost of requiring 2x available memory. The published
+algorithm used stack space to traverse and copy the heap objects which is
+undesirable since the stack space is limited and garbage collection will therefore
+fail if the heap grows too large. One year later, Cheney published a non-recursive
+algorithm for copying live objects and this algorithm has become the foundation
+for essentially all modern copying garbage collectors. Since the algorithm is
+non-recursive, it uses no stack space and works on heaps at any size.
+
+Cheney's and Fenichel's algorithms both solve the same problem of copying a graph
+with Cheney's algorithm having the decisive advantage of working on graphs of
+unlimited size. However, the two algorithms also differ in the fact that Fenichel
+copyed the graph in depth-first order and Cheney copies using breadth-first. This
+different copy order affects cache performance but the effects wasn't too pronounced
+with the architecture at the time and it wasn't unless 1984 that Moon et al
+investigated the effect copy order has with virtual memory. And it wasn't until
+1995 that the effects of copy order was quantified in relationship to the
+CPU memory cache hierarchy by Nakashima and Chikayama.
+
 Cheney, depth-first collectors, hierarchical copy order
+\section{Region inference}
 \section{Related work}
 Depth-first copying (two approaches), immix, custom object layout
 \section{Haskell}
