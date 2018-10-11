@@ -175,6 +175,17 @@ investigated the effect copy order has with virtual memory. And it wasn't until
 1995 that the effects of copy order was quantified in relationship to the
 CPU memory cache hierarchy by Nakashima and Chikayama.
 
+Moon modified Cheney's algorithm to have two scanning pointers instead of one.
+The to-space is divided up into blocks and the second scanning pointer always
+points at the same block as the free pointer. Since objects are read (scavenged)
+from the scanning pointer and children are copied (evacuated) to the free pointer,
+this means the algorithm often only touches a single block even when the graph
+is large and the free pointer is many blocks away from the first scanning pointer.
+Since this is optimizing for block/page access, it can perform better when memory
+is limited and page faults are expensive.
+
+
+
 Cheney, depth-first collectors, hierarchical copy order
 \section{Region inference}
 \section{Related work}
