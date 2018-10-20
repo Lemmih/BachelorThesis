@@ -93,11 +93,50 @@
 
 \tableofcontents*
 
-\chapter*{Preface}
-
-Stuff here about the thesis.
-
 \chapter{Introduction}
+High level, memory managed languages offer many productivity advantages because
+developers don't have to worry about how objects are arranged in memory. However,
+memory layout can hugely affect performance so the productivity advantages can
+come with efficiency disadvantages. Much research has been done not only to
+quantify this discrepancy but also to narrow the gap.
+
+In this thesis I will be looking at the memory layout of semi-space garbage
+collector in the context of a purely functional programming language.
+I will implement two optimizations in the garbage collector and evaluate these
+optimizations against the baseline.
+
+\section{Jikes RVM vs. native}
+*Why I use a native GC rather than the Jikes RVM (Research Virtual Machine)
+to test my hypothesis even though a lot of other people use it.
+Answer: Haskell has different allocation patterns than Java*
+
+\section{Research Aims}
+I have implemented a new semi-space garbage collector for a subset of the
+Haskell programming language. This collector contains two novel optimizations
+that modify how objects are arranged in memory. It is my hypothesis that these
+two optimizations will improve how the garbage collector interacts with the
+memory caches. As part of this work I want to answer the following questions:
+\begin{itemize}
+  \item Is the implementation unreasonably complicated? Some previously proposed
+    systems have shown promise on a small scale but were too complicated to be
+    used outside of academia.
+  \item Are the optimizations beneficial and do the benefits outweigh the costs?
+  \item Can the optimizations be ported to collectors used in industry?
+\end{itemize}
+
+\section{Thesis organization}
+Chapter 2 goes over the current approaches to garbage collection, how people
+have tried to solve the problem in the past, and provides details about
+LHC which are required by the later chapters.
+Chapter 3 describes the design and implementation of the main contribution of
+this thesis.
+Chapter 4 describes the design and implementation of a furhter optimization that
+follows as a direct consequence of the technique detailed in chapter 3.
+Chapter 5 evaluates these two new approaches against a baseline collector. This
+evaluation looks at deterministic factors which are proxies for performance.
+Chapter 6 concludes the work and presents possible future work.
+
+\chapter{Background}
 \section{Processors, memory and cache}
 
 CPUs used to run at similar frequencies as main memory, allowing them to read
