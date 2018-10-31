@@ -91,6 +91,10 @@
 %%  ==================================================================
 %%  End title page
 
+\chapter*{Abstract}
+
+\newpage
+
 \tableofcontents*
 
 \chapter{Introduction}
@@ -223,18 +227,44 @@ is large and the free pointer is many blocks away from the first scanning pointe
 Since this is optimizing for block/page access, it can perform better when memory
 is limited and page faults are expensive.
 
+Moon's algorithm was later improved by Wilson, Lam, and Moher to reduce the
+number of objects that are scavanged twice (scavanging is idempotent). Siegwart
+and Hirzel further improved performance by adapting the algorithm for
+multi-processor machines. Both groups of authors focused primarily on reducing
+cache and TLB misses.
 
+\section{Generational collectors}
+It was found imperically that most allocated objects become unreachable (die)
+almost immediately and that very few objects live for a significant fraction
+of a programs total run-time. This effect of high infant mortality is exploited
+by generational collectors by splitting the heap into two or more separate areas
+(aka generations) that can be collected independently. A common configuration is
+to have a minor and a major generation: New objects are allocated into the minor
+generation and promoted into the major generation if they survive a collection.
+Since it's relatively rare for older objects to contain pointers to younger
+objects, only a small amount of bookkeeping is necessary to collect the minor
+generation without tracing through all the live objects in the major generation.
+In other words, infant objects can be allocated and collected without tracing or
+copying long lived objects. This approach has proved so successful that, even
+though the exact rate of infant mortality and object longevity varies from
+program to program, generational GC is the default in most popular garbage
+collected languages.
 
-Cheney, depth-first collectors, hierarchical copy order
 \section{Region inference}
-\section{Related work}
-Depth-first copying (two approaches), immix, custom object layout
+
+
 \section{Haskell}
+\section{GHC}
 \section{LHC}
+\section{Related work}
+\subsection{Depth-first copying (two approaches)}
+\subsection{immix}
+\subsection{custom object layout (java)}
 
-\chapter{Limited depth-first copying}
+\chapter{Implementation}
+\section{Tail-first copy order}
 
-\chapter{Tail-pointer elimination}
+\section{Tail-pointer elimination}
 
 \chapter{Evaluation}
 
