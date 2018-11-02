@@ -7,6 +7,7 @@
 \usepackage{graphicx}
 \usepackage{tikz}
 
+\newcommand{\makecomment}[1]{{\color{red} Comment: #1}}
 
 \input{styles/jenor}
 \input{styles/hansen}
@@ -110,9 +111,9 @@ I will implement two optimizations in the garbage collector and evaluate these
 optimizations against the baseline.
 
 \section{Jikes RVM vs. native}
-*Why I use a native GC rather than the Jikes RVM (Research Virtual Machine)
+\makecomment{Why I use a native GC rather than the Jikes RVM (Research Virtual Machine)
 to test my hypothesis even though a lot of other people use it.
-Answer: Haskell has different allocation patterns than Java*
+Answer: Haskell has different allocation patterns than Java*}
 
 \section{Research Aims}
 I have implemented a new semi-space garbage collector for a subset of the
@@ -254,14 +255,31 @@ collected languages.
 
 
 \section{Haskell}
+\makecomment{Haskell is a purely functional language. Mutable objects are
+uncommon which leads to a high allocate rate (ie. in Haskell, you create new
+objects instead of mutating old ones. How many Haskellers does it take to
+change a broken lightbulb? Zero. The lightbulb is immutable. You just create
+a new house with a working lightbulb.)}
+
 \section{GHC}
+\makecomment{GHC's object model is assumes an open-world and is extendible.
+Objects as pointers has drawbacks, though, and GHC has abandoned the tagless
+model. However, they can only use 2-3 bits (on 32bit and 64bit machines,
+respectively) so their tagging is limited. LHC assumes a closed world and therefore
+sacrifices extendibility for more tagging bits. LHC can use nearly a full word
+for tagging.}
+
 \section{LHC}
+\makecomment{Which parts of LHC's architecture is important to describe?}
+
 \section{Related work}
 \subsection{Depth-first copying (two approaches)}
 \subsection{immix}
 \subsection{custom object layout (java)}
 
 \chapter{Implementation}
+\section{Baseline}
+
 \section{Tail-first copy order}
 
 \section{Tail-pointer elimination}
