@@ -6,6 +6,7 @@
 \usepackage{palatino}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage[autostyle]{csquotes}
 
 \newcommand{\makecomment}[1]{{\color{red} Comment: #1}}
 
@@ -347,17 +348,189 @@ for tagging.}
 % \chapter{Gap}
 % Give the problem definition and what is missing from the current solutions
 
-\chapter{Tikz}
-Tikz trial:
+\chapter*{Support}
 
-\begin{tikzpicture}
-  \draw[step=.5cm,gray,very thin] (-1.4,-1.4) grid (1.4,1.4);
-  \draw (-1.5,0) -- (1.5,0);
-  \draw (0,-1.5) -- (0,1.5);
-  \draw (0,0) circle [radius=1cm];
-  \fill[green!20!white, draw=green!50!black] (0,0) -- (3mm,0mm)
-    arc [start angle=0, end angle=30, radius=3mm] -- cycle;
-\end{tikzpicture}
+\makecomment{The following quotes show how the references will be used to support
+the introduction, implementation decisions, and conclusion. This chapter will
+not appear in the final version of this report.}
+
+\blockquote{Recent process speed improvements have far outpaced memory speed
+improvements.}\cite{Novark:2006}
+
+\blockquote{Past work has shown that careful placement of objects in memory can
+yield performance improvements as high as 42\% in C and C++ applications.}
+\cite{Novark:2006}
+
+\blockquote{In general, software references locality can be improved either by
+changing a program's data access pattern or its data organization and layout.}
+\cite{Chilimbi:1999}
+
+\blockquote{The speed of microprocessors has increased 60\% per year for almost
+two decades. Yet, over the same period, the time to access main memory only
+decreased at 10\% per year.}
+\cite{Chilimbi:1999}
+
+\blockquote{Careful placement of structure elements provides the mechanism to
+improve the cache locality of pointer manipulating programs and, consequently,
+their performance.}
+\cite{Chilimbi:1999}
+
+\blockquote{As processor speeds continue to improve relative to main-memory
+access times, cache performance is becoming an increasingly important component
+of program performance.}
+\cite{Reinhold:1994}
+
+\blockquote{Processors are getting faster, by as factor of 1.5 to 2 per year,
+while the speed of main-memory chips is improving only slowly.}
+\cite{Reinhold:1994}
+
+\blockquote{In this paper, we propose two copying garbage collection methods.
+These two methods copy data structures in depth-first order, while conventional
+method copies in breadth-first order. This modification greatly improves memory
+access locality during both garbage collection and computation after.\cite{Nakashima:1995}}
+
+\blockquote{In a computer with virtual memory both mark-and-sweep and
+reference-counting garbage collection tend to exhibit poor locality of reference
+and may run slowly because of excessive page faulting.}
+\cite{Chase:1987}
+
+\blockquote{The goal of hierarchical copying is to reduce cache and TLB misses
+by colocating objects on the same cache line or page. [...] Paralle hierarchical
+copying reduce mutator misses on all measured levels of the memory subsystem:
+L1 data cache, combined L2 cache, and TLB.\cite{Siegwart:2006}}
+
+
+\blockquote{Approximately depth-first copying improves the locality of
+data structures copied by the garbage collector.}
+\cite{Moon:1984}
+
+\blockquote{A copying garbage collector is free to choose the order in which
+it copies accessible objects. It can explit this freedom to improve locality by
+copying related objects onto the same page.}
+\cite{Moon:1984}
+
+\blockquote{A copying garbage collector can choose breadth-first copying or
+depth-first copying. The Cheney list-copying algorithm, which is traditionally
+used because it does not require any temporary storage (such as a stack), is
+breadth-first.\cite{Moon:1984}}
+
+
+\blockquote{Depth-first copying generally yields better locality than
+breadth-first copying, because it tends to put components of a structure on the
+same page as the parent structure.}
+\cite{Moon:1984}
+
+\makecomment{Jikes RVM and MMtk are explained here.}\cite{Blackburn:2004}
+
+\blockquote{To reduce fragmentation in mark-region and other non-moving
+collectors, this paper introduces opportunistic defragmentation which mixes
+copying and marking in a single pass. Using these building blocks, we introduce
+immix, a novel high performance garbage collector that combines mark-region with
+opportunistic defragmentation to achieve space efficiency, fast collection, and
+continguous allocation for mutator performance.\cite{Blackburn:2008}}
+
+\blockquote{This paper shows that, with enough memory on the computer, it is
+more expensive to explicitly free a cell than it is to leave it for the garbage
+collector - even if the cost of freeing a cell is only a single machine
+instruction.}
+\cite{Appel:1987}
+
+\blockquote{The traditional mark-and-sweep algorithm, which puts all free cells
+onto a linked list for later re-use, takes time proportional to the numebr of
+reachable cells plus the number of garbage cells.}
+\cite{Appel:1987}
+
+\blockquote{Garbage-collected systems such as Smalltalk, Lisp, or actor languages typically violate some of the basic locality assumptions of modern memory hierarchies, leading to poor performance of normal caching strategies. The main problem is cyclic reuse of memory at a time scale too long to be captured by any caching policy. \cite{Lam:1992}}
+
+
+\blockquote{Given our understanding of the memory reuse cycle of a generational
+garbage collector, we believe it is attractive to exploit the genertional
+property by using a cache large enough to hold the youngest generation.]}
+\cite{Lam:1992}
+
+\blockquote{In a garbage collected environment, multithreaded programs can run
+into an "allocation wall", in which performance is limited by the rate at which
+newly allocated data can be written to main memory, and adding more cores does
+not improve performance once the limit is reached. One way to avoid the
+allocation wall is to use a generational collector with per-thread nurseries
+each smaller than the size of the L2 cache, so that most memory accesses hit the
+cache rather than main memory. \cite{Marlow:2011}}
+
+\blockquote{The effectiveness problem is that reference counting fails to reclaim
+circular structures. If the pointers in a group of objects create a cycle, the
+objects' reference counts are never reduced to zero, even if there is no path
+to the objects from the root set. \cite{Wilson:1992}}
+
+
+\blockquote{The efficiency problem with reference counting is that its cost is
+generally proportional to the amount of work done by the running program, with a
+fairly large constant of proportionality.}
+\cite{Wilson:1992}
+
+\blockquote{There are three major problems with traditinal mark-sweep garbage
+collectors. First, it is difficult to handle objects of varying sizes without
+fragmentation of the available memory. [...] The second problem with mark-sweep
+collection is that the cost of a collection is proportional to the size of the
+heap, including both live and garbage objects. [...] The third problem involves
+locality of reference. Since objects are never moved, the live objects remain in
+place after a collection, interspersed with free space. \cite{Wilson:1992}}
+
+\blockquote{The graph of records and pointers is mostly acyclic: newer records
+point to older records, and older records do not point to newer records.}
+\cite{Appel:1989}
+
+\blockquote{A young object is more likely to become garbage soon. Most objects
+have short lifetimes, and only a few objects have long lifetimes. If something
+has lasted for a long time already, then it’s probably part of a semi-permanent
+data structure; if the object is relatively new, it’s likely to be a temporary
+structure holding an intermediate result. \cite{Appel:1989}}
+
+\blockquote{Matrix multiplication is a classical bench-mark for experimenting
+with techniques used to exploit machine architecture and to overcome the
+limitations of contemporary memory subsystems.}
+\cite{Eiron:1999}
+
+\blockquote{This research aims at advancing the state of the art of algorithm
+engineering by balancing instruction level parallelism, two levels of data
+tiling, copying to provably avoid any cache conficts, and prefetching in
+parallel to algorithmic operations, in order to fully exploit the memory
+bandwidth. Measurements show that the resultant matrix multiplication algorithm
+outperforms IBM's ESSL by 6.8-31.8\%, is less sensitive to the size of the
+input data, and scales better. \cite{Eiron:1999}}
+
+\blockquote{As the gap between CPU and memory performance continues to grow, so
+does the importance of e ective utilization of the memory hierarchy.}
+\cite{Eiron:1999}
+
+\blockquote{Temporal garbage collection (TGC) is based on two heu-ristics:
+• Young objects tend lo become garbage quickly.
+• The number of pointers from old objects to young objects is relatively small.}
+\cite{Courts:1988}
+
+\blockquote{Our measurements show that poor locality in sequential-fit
+allocation algorithms reduces program per-formance, both by increasing paging
+and cache miss rates. While increased paging can be debilitating on any
+architecture, cache misses rates are also important for modern computer
+architectures. \cite{Grunwald:1993}}
+
+\blockquote{The algorithm avoids the need for recursion by using the partial
+structure as it is built up to keep track of those lists that have been copied.}
+\cite{Cheney:1970}
+
+\bibliographystyle{alpha}
+\bibliography{sources}
+
+% \chapter{Tikz}
+% Tikz trial:
+%
+% \begin{tikzpicture}
+%   \draw[step=.5cm,gray,very thin] (-1.4,-1.4) grid (1.4,1.4);
+%   \draw (-1.5,0) -- (1.5,0);
+%   \draw (0,-1.5) -- (0,1.5);
+%   \draw (0,0) circle [radius=1cm];
+%   \fill[green!20!white, draw=green!50!black] (0,0) -- (3mm,0mm)
+%     arc [start angle=0, end angle=30, radius=3mm] -- cycle;
+% \end{tikzpicture}
 
 
 \end{document}
