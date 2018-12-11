@@ -4,11 +4,38 @@
 \usepackage[utf8]{inputenc}
 \usepackage{wallpaper}
 \usepackage{palatino}
+\usepackage{url}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage{multirow}
 \usepackage[autostyle]{csquotes}
 
 \newcommand{\makecomment}[1]{{\color{red} Comment: #1}}
+
+
+\newenvironment{ltable}[2]
+{\hspace*{-2.5cm}\begin{minipage}{0.5\linewidth}
+  \centering
+  \caption{#1}
+  \label{#2}}
+{\end{minipage}}
+
+\newenvironment{rtable}[2]
+{\hspace*{3cm}\begin{minipage}{0.5\linewidth}
+  \centering
+  \caption{#1}
+  \label{#2}}
+{\end{minipage}}
+
+\newcommand{\data}[1]{{
+\resizebox{8cm}{!}{%
+\begin{tabular}{|l|c|c|c|}
+  #1
+\end{tabular}}
+}}
+
+\setcounter{secnumdepth}{3}
+% \setcounter{tocdepth}{3}
 
 \input{styles/jenor}
 \input{styles/hansen}
@@ -36,10 +63,10 @@
 % \chapterstyle{companion}
 % \chapterstyle{hangnum}
 % \chapterstyle{lyhne} % OKish
-% \chapterstyle{madsen} % OK
+\chapterstyle{madsen} % OK
 % \chapterstyle{jenor} % Font too big
 % \chapterstyle{wilsondob}
-\chapterstyle{hansen} % OK
+% \chapterstyle{hansen} % OK
 
 %\maxsecnumdepth{subsection}
 
@@ -79,7 +106,7 @@
     \vspace*{2.5cm} \\
     \textbf{\Huge Cache optimizations in garbage collection} \\
     \vspace*{.1cm} \\
-    {\huge Dynamically selecting cache-frindly object layouts} \\
+    {\huge Opportunistically selecting cache-frindly object layouts} \\
     \begin{tabbing}
     % adjust the hspace below for the longest author name
     David Himmelstrup \hspace{1cm} \= \texttt{<vrs552@alumni.ku.dk>} \\
@@ -135,15 +162,15 @@ Chapter 2 goes over the current approaches to garbage collection, how people
 have tried to solve the problem in the past, and provides details about
 LHC which are required by the later chapters.
 Chapter 3 describes the design and implementation of the main contribution of
-this thesis.
-Chapter 4 describes the design and implementation of a furhter optimization that
-follows as a direct consequence of the technique detailed in chapter 3.
-Chapter 5 evaluates these two new approaches against a baseline collector. This
+this thesis, as well as the design and implementation of a furhter optimization
+that follows as a direct consequence of the tail-copy technique.
+Chapter 4 evaluates these two new approaches against a baseline collector. This
 evaluation looks at deterministic factors which are proxies for performance.
-Chapter 6 concludes the work and presents possible future work.
+Chapter 5 concludes the work and presents possible future work.
 
 \chapter{Background}
 \section{Processors, memory and cache}
+\makecomment{Diagrams for this section: memory hierarchy.}
 
 CPUs used to run at similar frequencies as main memory, allowing them to read
 from memory at roughly the same speed that it could process the information.
@@ -176,7 +203,7 @@ can be orders of magnitude faster.
 Still widely used in low-level languages and on embedded systems.
 The onus is on the user to ensure correct usage.
 Modern languages are usually garbage collected (8/10 most popular langauges on
-github in 2017 were garbage collected).
+github\cite{GithubLanguages} in 2017 were garbage collected).
 Manual management has low overhead and can finalize objects immediately when
 they're no longer used. This is important for limited resources such as file
 handlers, file locks, etc.
@@ -185,6 +212,8 @@ but performs less well in terms of throughput and locality.
 
 \section{Reference counting}
 \section{Mark-and-sweep}
+\makecomment{Diagrams for this section: mark-and-sweep.}
+
 Unlike manual management and reference counting which never scans through all
 the heap allocated objects, tracing garbage collection involves finding all live
 heap objects by following a root set of objects out through all their children
@@ -198,6 +227,8 @@ referenced but, similarly to manual management and reference counting, leads to
 fragmentation and thus poor cache performance.
 
 \section{Copying collectors}
+\makecomment{Diagrams for this section: semi-space algorithm, moon's algorithm.}
+
 In 1969, Fenichel et al published an algorithm for copying the reachable objects
 into newly allocated memory chunk rather than merely marking them. Once the copying
 is complete, all previously used memory will no longer contain live objects
@@ -236,6 +267,8 @@ multi-processor machines. Both groups of authors focused primarily on reducing
 cache and TLB misses.
 
 \section{Generational collectors}
+\makecomment{Diagrams for this section: generational gc.}
+
 It was found imperically that most allocated objects become unreachable (die)
 almost immediately and that very few objects live for a significant fraction
 of a programs total run-time. This effect of high infant mortality is exploited
@@ -256,13 +289,15 @@ collected languages.
 
 
 \section{Haskell}
-\makecomment{Haskell is a purely functional language. Mutable objects are
+\makecomment{Haskell is a purely functional language.\cite{HaskellReport} Mutable objects are
 uncommon which leads to a high allocate rate (ie. in Haskell, you create new
 objects instead of mutating old ones. How many Haskellers does it take to
 change a broken lightbulb? Zero. The lightbulb is immutable. You just create
 a new house with a working lightbulb.)}
 
 \section{GHC}
+\makecomment{Diagrams for this section: GHC's memory model, GHC's pipeline.}
+
 \makecomment{GHC's object model is assumes an open-world and is extendible.
 Objects as pointers has drawbacks, though, and GHC has abandoned the tagless
 model. However, they can only use 2-3 bits (on 32bit and 64bit machines,
@@ -271,7 +306,9 @@ sacrifices extendibility for more tagging bits. LHC can use nearly a full word
 for tagging.}
 
 \section{LHC}
-\makecomment{Which parts of LHC's architecture is important to describe?}
+\makecomment{Which parts of LHC's architecture is important to describe? \cite{LHC}
+Include: Simplicity of the RTS, Compiles subset of Haskell, Generates high-level
+LLVM code, Similar memory model to GHC, Whole-program compiler.}
 
 \section{Related work}
 \subsection{Depth-first copying (two approaches)}
@@ -279,13 +316,396 @@ for tagging.}
 \subsection{custom object layout (java)}
 
 \chapter{Tail-copying and tail-compaction}
-\section{Baseline}
 
-\section{Tail-first copy order}
+\section{Concept overview}
 
-\section{Tail-pointer elimination}
+\makecomment{Diagrams for this section: Copy order and cache lines (depth-first,
+breadth-first, tail-first), tail pointer elimination.}
+
+While it has been shown that tracing garbage collectors that use a depth-first
+copying algorithm have superior data locality, this technique is not used in any
+of the ten most popular languages on GitHub. The overheads in turns of memory
+usage and runtime performance are simply too great and the benefits only
+manifests themselves in niche situations (eg. with limited physical memory and
+a high cost of page faults). However, I think a compromise is possible that
+maintains most of the data locality benefits without hampering performance in
+the common case, making such an algorithm suitable as the default garbage
+collector.
+
+Between depth-first copying and breadth-first copying, there exist a middle-ground
+which I call tail-first copying. In this scheme, exactly one child of each node
+(the tail) is copied depth-first and the rest of the children (if there are any)
+are copied breadth-first. This has several potential benefits.
+\begin{itemize}
+  \item
+  Firstly, as one
+  child is likely (but not guaranteed to be) next to its parent, the mutator could
+  experience improved locality if it traverses the spine of a data structure (ie.
+  down the length of a list or down the right-most path of a tree).
+  \item
+  Secondly, and
+  more importantly, the tail-first copying algorithm operates over blocks of
+  tail-linked nodes and is less likely to interleave unrelated nodes. In contrast,
+  depth-first copying of two linked lists results in each node of the lists being
+  interleaved. And if the heap was extended to include a third list, that list
+  would be interleaved with the first two. This means memory is typically not
+  copied sequentially which leads to more costly cache misses.
+  \item
+  The final benefit
+  is that tail-first copying does not require any reserved book-keeping data in
+  each node nor does it require any extra stack space. The copying algorithm that
+  places children next to their parents is tail-recursive (ie it uses a fixed
+  amount of stack space), and, just like the breadth-first algorithm, a single
+  pointer can be used to keep track of which objects have been scavenged and which
+  have not.
+\end{itemize}
+
+Tail-first copying in inherently optimistic as there are many situations that
+make it impossible to put a child node right after its parent. Each of these
+situations have to be detected and they add complexity as well as logic branches
+to the algorithm. There are three key cases to consider:
+\begin{enumerate}
+  \item Multiple parents. Objects may have any number of parents but can only be
+  placed next to one. In this case, the child would be placed next to the first
+  parent and all subsequently traversed parents will be placed potentially far
+  away in memory. I don't believe this to be a big problem as, while having
+  multiple is definitely not uncommon, the majority of objects should only have
+  a single parent.
+  \item
+  Unlucky root set traversal. If object A is the parent of object B and the root
+  set contains both objects, there's a chance that object B will be copied
+  (evacuated) before object A and it therefore cannot be placed immediately
+  after object A. This should be a minor problem as root set traversals happen
+  infrequently and the size of the root sets are fixed at compile-time.
+  \item
+  Generational barriers. In generational garbage collectors, objects are
+  separated by age into different areas (called generations). Objects in
+  separate generations must live apart and cannot be placed right next to each
+  other. Fortunately, as objects in older generations rarely point to objects in
+  younger generations and due to techniques such as eager promotion (moving an
+  object to an older generation if it has parents in that generation), data
+  structures are rarely interspersed over many generations. Instead, chunks of
+  linked data tends to be located in the same generation, with possible links
+  to chunks of data in other generations. As such, I don't believe generational
+  garbage collecting would significantly affect the behavior of tail-copying.
+  That said, this report will focus exclusively on adding tail-copying to a
+  non-generational garbage collector.
+\end{enumerate}
+
+For nodes that cannot be placed immediately next to their parent, tail-first
+copying is identical to breadth-first copying.
+\newline
+\newline
+After the live objects in a heap have been traced by the tail-first copying
+algorithm, many of the objects will have a peculiar property in common: They'll
+contain a pointer to a child located right after it. That is, these objects
+of size $S$ and located at position $X$, will contain a pointer to a child at
+location $X+S$. This common, repeated pattern can be compressed to a single bit
+set in the parent's object header: If the bit is set, the last child pointer is
+omitted from the object itself and instead calculated as $X+S$.
+
+
+
+\section{Implementation}
+
+\subsection{Baseline}
+
+\subsection{Tail-first copy order}
+
+\subsection{Tail-pointer elimination}
 
 \chapter{Evaluation}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Mutator and GC tables
+
+\begin{table}[t]
+  \begin{ltable}{Mutator time}{muttable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Mutator times:}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate&3.3s (±0.5\%)&+0.1\% (±0.2\%)&+0.1\% (±0.5\%)\\
+    BinTree&3.4s (±0.1\%)&-0.2\% (±0.3\%)&-0.3\% (±0.2\%)\\
+    Bush&2.4s (±0.2\%)&-0.1\% (±0.5\%)&-0.5\% (±0.3\%)\\
+    BushTail&3.6s (±0.4\%)&+0.4\% (±0.3\%)&+0.2\% (±0.4\%)\\
+    Imbalanced&2.7s (±0.3\%)&+0.0\% (±0.1\%)&-0.2\% (±0.4\%)\\
+    MemBench&3.5s (±0.2\%)&+0.1\% (±0.2\%)&+0.0\% (±0.2\%)\\
+    PowerSet&6.9s (±0.2\%)&+0.1\% (±0.3\%)&+0.1\% (±0.2\%)\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-0.2\%&-0.5\%\\
+    \multicolumn{2}{|l|}{Max}&0.4\%&0.2\%\\
+    \multicolumn{2}{|l|}{Mean}&0.0\%&-0.1\%\\
+    \hline
+
+    }
+  \end{ltable}
+  \begin{rtable}{GC time}{gctable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{GC times:}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate&3.8s (±0.3\%)&+19.3\% (±0.2\%)&+9.3\% (±0.1\%)\\
+    BinTree&4.5s (±0.2\%)&+15.7\% (±0.3\%)&+10.0\% (±0.1\%)\\
+    Bush&2.7s (±0.3\%)&+12.2\% (±0.4\%)&+9.4\% (±0.4\%)\\
+    BushTail&3.5s (±0.7\%)&+11.9\% (±0.3\%)&+7.0\% (±1.8\%)\\
+    Imbalanced&3.8s (±0.2\%)&+1.4\% (±0.7\%)&-3.8\% (±0.3\%)\\
+    MemBench&7.8s (±1.1\%)&-28.1\% (±0.8\%)&-31.7\% (±0.6\%)\\
+    PowerSet&12.3s (±0.8\%)&-30.5\% (±0.3\%)&-34.2\% (±0.4\%)\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-30.5\%&-34.2\%\\
+    \multicolumn{2}{|l|}{Max}&19.3\%&10.0\%\\
+    \multicolumn{2}{|l|}{Mean}&0.3\%&-4.9\%\\
+    \hline
+    }
+  \end{rtable}
+\end{table}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Heap size and allocations tables
+
+\begin{table}
+  \begin{ltable}{Collections}{coltable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Heap size:}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate&1.8 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    BinTree&1.5 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    Bush&1.0 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    BushTail&1.6 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    Imbalanced&1.3 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    MemBench&1.4 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    PowerSet&1.5 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&0.0\%&0.0\%\\
+    \multicolumn{2}{|l|}{Max}&0.0\%&0.0\%\\
+    \multicolumn{2}{|l|}{Mean}&0.0\%&0.0\%\\
+    \hline
+    }
+  \end{ltable}
+  \begin{rtable}{Allocations}{alloctable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Allocated:}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate&9.0 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    BinTree&9.8 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    Bush&6.6 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    BushTail&5.2 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    Imbalanced&7.8 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    MemBench&9.7 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    PowerSet&15.1 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&0.0\%&0.0\%\\
+    \multicolumn{2}{|l|}{Max}&0.0\%&0.0\%\\
+    \multicolumn{2}{|l|}{Mean}&0.0\%&0.0\%\\
+    \hline
+    }
+  \end{rtable}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Copied and page-faults
+
+\begin{table}
+  \begin{ltable}{Copied}{copiedtable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Copied:}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate&4.9 gb (±0.0\%)&+0.0\% (±0.0\%)&-33.3\% (±0.0\%)\\
+    BinTree&3.8 gb (±0.0\%)&+0.0\% (±0.0\%)&-25.0\% (±0.0\%)\\
+    Bush&2.5 gb (±0.0\%)&+0.0\% (±0.0\%)&-12.5\% (±0.0\%)\\
+    BushTail&3.1 gb (±0.0\%)&+0.0\% (±0.0\%)&-19.9\% (±0.0\%)\\
+    Imbalanced&3.0 gb (±0.0\%)&+0.0\% (±0.0\%)&-25.0\% (±0.0\%)\\
+    MemBench&4.9 gb (±0.0\%)&+0.0\% (±0.0\%)&-20.0\% (±0.0\%)\\
+    PowerSet&7.6 gb (±0.0\%)&+0.0\% (±0.0\%)&-20.0\% (±0.0\%)\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&0.0\%&-33.3\%\\
+    \multicolumn{2}{|l|}{Max}&0.0\%&-12.5\%\\
+    \multicolumn{2}{|l|}{Mean}&0.0\%&-22.2\%\\
+    \hline
+    }
+  \end{ltable}
+  \begin{rtable}{Page faults}{pagetable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Page faults:}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate&4.0 mil (±0.0\%)&+0.0\% (±0.0\%)&-10.7\% (±0.0\%)\\
+    BinTree&3.6 mil (±0.0\%)&+0.0\% (±0.0\%)&-6.8\% (±0.0\%)\\
+    Bush&2.6 mil (±0.0\%)&-0.0\% (±0.0\%)&-3.2\% (±0.0\%)\\
+    BushTail&3.3 mil (±0.0\%)&-0.0\% (±0.0\%)&-5.0\% (±0.0\%)\\
+    Imbalanced&2.9 mil (±0.0\%)&+0.0\% (±0.0\%)&-7.0\% (±0.0\%)\\
+    MemBench&4.1 mil (±0.0\%)&+0.0\% (±0.0\%)&-6.3\% (±0.0\%)\\
+    PowerSet&7.7 mil (±0.0\%)&-0.0\% (±0.0\%)&-5.2\% (±0.0\%)\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-0.0\%&-10.7\%\\
+    \multicolumn{2}{|l|}{Max}&0.0\%&-3.2\%\\
+    \multicolumn{2}{|l|}{Mean}&-0.0\%&-6.3\%\\
+    \hline
+    }
+  \end{rtable}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Copied and page-faults
+
+\begin{table}
+  \begin{ltable}{Cycles}{cycletable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Cycles (billions):}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate&29.3 (±0.7\%)&+11.2\% (±0.4\%)&+4.7\% (±0.4\%)\\
+    BinTree&32.5 (±0.3\%)&+9.9\% (±2.9\%)&+6.0\% (±1.4\%)\\
+    Bush&21.1 (±3.2\%)&+6.0\% (±0.1\%)&+4.5\% (±0.3\%)\\
+    BushTail&29.4 (±0.1\%)&+5.5\% (±0.1\%)&+3.2\% (±0.3\%)\\
+    Imbalanced&26.8 (±0.2\%)&+0.8\% (±0.3\%)&-2.4\% (±0.3\%)\\
+    MemBench&46.0 (±0.5\%)&-18.8\% (±0.1\%)&-21.7\% (±0.3\%)\\
+    PowerSet&79.1 (±0.3\%)&-19.1\% (±0.2\%)&-21.4\% (±0.7\%)\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-19.1\%&-21.7\%\\
+    \multicolumn{2}{|l|}{Max}&11.2\%&6.0\%\\
+    \multicolumn{2}{|l|}{Mean}&-0.6\%&-3.9\%\\
+    \hline
+    }
+  \end{ltable}
+  \begin{rtable}{Instructions}{insttable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Instructions (billions):}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate&60.0 (±0.1\%)&-3.3\% (±0.1\%)&-1.5\% (±0.1\%)\\
+    BinTree&48.6 (±0.4\%)&-1.3\% (±0.3\%)&+0.0\% (±1.0\%)\\
+    Bush&32.3 (±0.5\%)&-0.5\% (±0.4\%)&+0.1\% (±0.3\%)\\
+    BushTail&40.2 (±0.5\%)&-2.1\% (±0.4\%)&-1.1\% (±0.3\%)\\
+    Imbalanced&39.1 (±0.5\%)&-1.4\% (±0.2\%)&+0.2\% (±0.2\%)\\
+    MemBench&52.9 (±0.1\%)&-1.4\% (±0.1\%)&-0.1\% (±0.2\%)\\
+    PowerSet&92.7 (±0.1\%)&-1.1\% (±0.1\%)&-0.1\% (±0.1\%)\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-3.3\%&-1.5\%\\
+    \multicolumn{2}{|l|}{Max}&-0.5\%&0.2\%\\
+    \multicolumn{2}{|l|}{Mean}&-1.6\%&-0.4\%\\
+    \hline
+    }
+  \end{rtable}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% branches and branch misses
+
+\begin{table}
+  \begin{ltable}{Branches}{branchtable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Branches (billion):}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate&11.1 (±0.1\%)&-3.7\% (±0.3\%)&-0.8\% (±0.1\%)\\
+    BinTree&8.6 (±0.2\%)&-1.5\% (±0.3\%)&+1.7\% (±0.3\%)\\
+    Bush&5.7 (±0.6\%)&+1.1\% (±1.0\%)&+2.1\% (±0.3\%)\\
+    BushTail&7.1 (±0.5\%)&-2.0\% (±0.3\%)&+0.4\% (±0.3\%)\\
+    Imbalanced&6.8 (±0.5\%)&-1.7\% (±0.4\%)&+1.5\% (±0.4\%)\\
+    MemBench&9.4 (±0.1\%)&-1.5\% (±0.2\%)&+1.0\% (±0.2\%)\\
+    PowerSet&16.2 (±0.2\%)&-1.4\% (±0.0\%)&+0.8\% (±0.1\%)\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-3.7\%&-0.8\%\\
+    \multicolumn{2}{|l|}{Max}&1.1\%&2.1\%\\
+    \multicolumn{2}{|l|}{Mean}&-1.5\%&1.0\%\\
+    \hline
+    }
+  \end{ltable}
+  \begin{rtable}{Branch misses}{branchmisstable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Branch Misses (million):}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate&8.5 (±4.1\%)&-5.9\% (±0.7\%)&-16.7\% (±0.7\%)\\
+    BinTree&30.3 (±0.5\%)&+88.6\% (±0.3\%)&+85.6\% (±0.5\%)\\
+    Bush&17.4 (±1.0\%)&+81.5\% (±0.6\%)&+88.2\% (±0.1\%)\\
+    BushTail&16.2 (±0.8\%)&+41.2\% (±0.6\%)&+39.0\% (±0.4\%)\\
+    Imbalanced&33.7 (±0.4\%)&+9.1\% (±0.3\%)&+5.8\% (±0.4\%)\\
+    MemBench&10.6 (±0.9\%)&-8.6\% (±0.7\%)&-13.4\% (±1.0\%)\\
+    PowerSet&19.8 (±0.6\%)&-7.3\% (±0.8\%)&-10.9\% (±0.8\%)\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-8.6\%&-16.7\%\\
+    \multicolumn{2}{|l|}{Max}&88.6\%&88.2\%\\
+    \multicolumn{2}{|l|}{Mean}&28.4\%&25.4\%\\
+    \hline
+    }
+  \end{rtable}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% LLC loads and LLC misses
+
+\begin{table}
+  \begin{ltable}{LLC loads}{llctable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{LLC Loads:}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate&9.4 million (±7.4\%)&+36.2\% (±3.3\%)&+4.7\% (±1.4\%)\\
+    BinTree&71.2 million (±2.4\%)&-1.0\% (±1.4\%)&-3.8\% (±2.4\%)\\
+    Bush&38.4 million (±0.8\%)&+9.6\% (±3.0\%)&+7.4\% (±1.0\%)\\
+    BushTail&62.5 million (±5.0\%)&-1.5\% (±3.5\%)&-3.6\% (±2.7\%)\\
+    Imbalanced&50.2 million (±0.7\%)&-9.4\% (±1.4\%)&-12.5\% (±1.1\%)\\
+    MemBench&186.1 million (±0.3\%)&-87.5\% (±1.6\%)&-87.8\% (±2.9\%)\\
+    PowerSet&299.8 million (±0.7\%)&-87.6\% (±1.1\%)&-88.0\% (±5.8\%)\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-87.6\%&-88.0\%\\
+    \multicolumn{2}{|l|}{Max}&36.2\%&7.4\%\\
+    \multicolumn{2}{|l|}{Mean}&-20.2\%&-26.2\%\\
+    \hline
+    }
+  \end{ltable}
+  \begin{rtable}{LLC load misses}{llcmisstable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{LLC Load Misses:}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate&4.5 million (±4.2\%)&+4.1\% (±0.9\%)&-0.7\% (±3.7\%)\\
+    BinTree&61.3 million (±1.0\%)&-2.8\% (±2.6\%)&-3.0\% (±1.0\%)\\
+    Bush&33.0 million (±2.0\%)&+9.0\% (±2.5\%)&+8.9\% (±3.0\%)\\
+    BushTail&53.5 million (±5.7\%)&-3.3\% (±3.6\%)&-5.0\% (±2.8\%)\\
+    Imbalanced&42.0 million (±1.4\%)&-12.2\% (±1.0\%)&-10.9\% (±2.5\%)\\
+    MemBench&84.0 million (±0.5\%)&-78.6\% (±0.8\%)&-78.4\% (±0.5\%)\\
+    PowerSet&132.4 million (±0.8\%)&-78.6\% (±2.3\%)&-78.3\% (±8.1\%)\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-78.6\%&-78.4\%\\
+    \multicolumn{2}{|l|}{Max}&9.0\%&8.9\%\\
+    \multicolumn{2}{|l|}{Mean}&-23.2\%&-23.9\%\\
+    \hline
+    }
+  \end{rtable}
+\end{table}
 
 \chapter{Conclusion}
 
@@ -517,7 +937,7 @@ architectures. \cite{Grunwald:1993}}
 structure as it is built up to keep track of those lists that have been copied.}
 \cite{Cheney:1970}
 
-\bibliographystyle{alpha}
+\bibliographystyle{unsrt}
 \bibliography{sources}
 
 % \chapter{Tikz}
