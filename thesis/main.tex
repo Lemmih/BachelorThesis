@@ -162,7 +162,7 @@ Chapter 2 goes over the current approaches to garbage collection, how people
 have tried to solve the problem in the past, and provides details about
 LHC which are required by the later chapters.
 Chapter 3 describes the design and implementation of the main contribution of
-this thesis, as well as the design and implementation of a furhter optimization
+this thesis, as well as the design and implementation of a further optimization
 that follows as a direct consequence of the tail-copy technique.
 Chapter 4 evaluates these two new approaches against a baseline collector. This
 evaluation looks at deterministic factors which are proxies for performance.
@@ -202,7 +202,7 @@ can be orders of magnitude faster.
 \section{Manual memory management}
 Still widely used in low-level languages and on embedded systems.
 The onus is on the user to ensure correct usage.
-Modern languages are usually garbage collected (8/10 most popular langauges on
+Modern languages are usually garbage collected (8/10 most popular languages on
 github\cite{GithubLanguages} in 2017 were garbage collected).
 Manual management has low overhead and can finalize objects immediately when
 they're no longer used. This is important for limited resources such as file
@@ -244,7 +244,7 @@ non-recursive, it uses no stack space and works on heaps at any size.
 Cheney's and Fenichel's algorithms both solve the same problem of copying a graph
 with Cheney's algorithm having the decisive advantage of working on graphs of
 unlimited size. However, the two algorithms also differ in the fact that Fenichel
-copyed the graph in depth-first order and Cheney copies using breadth-first. This
+copied the graph in depth-first order and Cheney copies using breadth-first. This
 different copy order affects cache performance but the effects wasn't too pronounced
 with the architecture at the time and it wasn't unless 1984 that Moon et al
 investigated the effect copy order has with virtual memory. And it wasn't until
@@ -261,7 +261,7 @@ Since this is optimizing for block/page access, it can perform better when memor
 is limited and page faults are expensive.
 
 Moon's algorithm was later improved by Wilson, Lam, and Moher to reduce the
-number of objects that are scavanged twice (scavanging is idempotent). Siegwart
+number of objects that are scavenged twice (scavenging is idempotent). Siegwart
 and Hirzel further improved performance by adapting the algorithm for
 multi-processor machines. Both groups of authors focused primarily on reducing
 cache and TLB misses.
@@ -269,7 +269,7 @@ cache and TLB misses.
 \section{Generational collectors}
 \makecomment{Diagrams for this section: generational gc.}
 
-It was found imperically that most allocated objects become unreachable (die)
+It was found empirically that most allocated objects become unreachable (die)
 almost immediately and that very few objects live for a significant fraction
 of a programs total run-time. This effect of high infant mortality is exploited
 by generational collectors by splitting the heap into two or more separate areas
@@ -299,7 +299,7 @@ a new house with a working lightbulb.)}
 \makecomment{Diagrams for this section: GHC's memory model, GHC's pipeline.}
 
 \makecomment{GHC's object model is assumes an open-world and is extendible.
-Objects as pointers has drawbacks, though, and GHC has abandoned the tagless
+Objects as pointers has drawbacks, though, and GHC has abandoned the tag-less
 model. However, they can only use 2-3 bits (on 32bit and 64bit machines,
 respectively) so their tagging is limited. LHC assumes a closed world and therefore
 sacrifices extendibility for more tagging bits. LHC can use nearly a full word
