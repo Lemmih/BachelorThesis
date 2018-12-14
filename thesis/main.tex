@@ -404,23 +404,83 @@ location $X+S$. This common, repeated pattern can be compressed to a single bit
 set in the parent's object header: If the bit is set, the last child pointer is
 omitted from the object itself and instead calculated as $X+S$.
 
-
+Switching between breadth-first, depth-first, and tail-first copy order does not
+change the sematic layout of the heap objects and this can therefore be done
+without changing any other parts of the evaluator or the runtime system. In
+contrast, omitting the tail pointer \emph{does} change the memory model and
+all systems that interact with the heap objects will need to take it into
+account.
 
 \section{Implementation}
 
-\subsection{Baseline}
+\subsection{Baseline garbage collector}
+
+Before tail-first copy order and tail-pointer elimination can be implemented,
+a semi-space garbage collector needs to be written for LHC. While LHC didn't
+ship with a semi-space garbage collector when this project began, it does have
+excellent support for finding the roots of the heap which happens to be one of
+the most difficult parts of a garbage collector.
+
+The garbage collector that I've implemented in LHC is nearly identical to the
+algorithm put forth in Cheney's "A Nonrecursive List Compacting Algorithm"
+without any of the improvements that were later invented (such as cache-sized
+nurseries, stepping, or generations). The algorithm has five steps and is run
+when new allocations have hit a certain limit:
+\begin{enumerate}
+  \item Allocate a \emph{to-space} of the same size as the previous heap. This
+  ensures that there will be enough space to potentially copy the entire heap.
+  \item Marking: Evacuate (copy object without copying children) everything in the root-set.
+  \item Scavenging: For each object in \emph{to-space}, evacuate its children. Once all
+  the objects have been scavenged, the entire heap will have been traced and all
+  live objects are copied.
+  \item Extend the \emph{to-space} with a new allocation area. This allocation
+  area is the size of the \emph{to-space} multiplied by a factor of 3. That is,
+  if \emph{to-space} contains, say, 2 megabytes of objects, the new allocation
+  area will allow $2*3=6$ megabytes of new objects to be allocated before another
+  round of garbage collection is triggered. For performance reasons, the allocation
+  area cannot be smaller than 1 megabyte.
+  \item Free the old heap and declare \emph{to-space} to be the new heap.
+\end{enumerate}
+
+LHC's garbage collection API made it simple to implement the above algorithm
+without having to worry how the rest of the compiler is constructed.
+Additionally, the garbage collection API is timed with high-precision clocks
+to give accurate summary of how much time is spent in the mutator compared to
+the garbage collector.
 
 \subsection{Tail-first copy order}
 
+Keywords: 'evacuate' procedure, tail-recursive, give pointer to address of
+tail-pointer, new branch: has-children.
+
 \subsection{Tail-pointer elimination}
+
+Parent nodes can either be compacted or not compacted. Child nodes can be in
+three different states (already evacuated, indirection, untouched).
+
+Six different cases:
+\begin{itemize}
+  \item Compacted parent with already evacuated child.
+  \item Compacted parent with indirection as child.
+  \item Compacted parent with untouched child.
+  \item Parent with already evacuated child.
+  \item Parent with indirection as child.
+  \item Parent with untouched child.
+\end{itemize}
 
 \chapter{Evaluation}
 
+\section{Methodology}
+Keywords: 7 test programs with different allocation patterns, 12 measured metrics,
+some allocation patterns are faster, some are slower, metrics measured internally
+(gc time, mut time, collections, allocated, copied), rest measured
+by 'perf', each program was run 5 times.
 
+\section{Results and interpretation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Mutator and GC tables
 
-\begin{table}[t]
+\begin{table}
   \begin{ltable}{Mutator time}{muttable}
     \data{
     \hline
@@ -936,6 +996,12 @@ architectures. \cite{Grunwald:1993}}
 \blockquote{The algorithm avoids the need for recursion by using the partial
 structure as it is built up to keep track of those lists that have been copied.}
 \cite{Cheney:1970}
+
+LLVM\cite{LLVM}
+
+LLVM GC support\cite{LLVMGC}
+
+GHC memory model \cite{GHCCommentary}
 
 \bibliographystyle{unsrt}
 \bibliography{sources}
