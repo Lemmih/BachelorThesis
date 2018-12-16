@@ -423,7 +423,7 @@ set in the parent's object header: If the bit is set, the last child pointer is
 omitted from the object itself and instead calculated as $X+S$.
 
 Switching between breadth-first, depth-first, and tail-first copy order does not
-change the sematic layout of the heap objects and this can therefore be done
+change the semantic layout of the heap objects and this can therefore be done
 without changing any other parts of the evaluator or the runtime system. In
 contrast, omitting the tail pointer \emph{does} change the memory model and
 all systems that interact with the heap objects will need to take it into
@@ -440,7 +440,7 @@ excellent support for finding the roots of the heap which happens to be one of
 the most difficult parts of a garbage collector.
 
 The garbage collector that I've implemented in LHC is nearly identical to the
-algorithm put forth in Cheney's "A Nonrecursive List Compacting Algorithm"
+algorithm put forth in Cheney's "A Non-recursive List Compacting Algorithm"
 without any of the improvements that were later invented (such as cache-sized
 nurseries, stepping, or generations). The algorithm has five steps and is run
 when new allocations have hit a certain limit:
