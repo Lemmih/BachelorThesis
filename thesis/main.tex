@@ -136,7 +136,9 @@ quantify this discrepancy but also to narrow the gap.
 In this thesis I will be looking at the memory layout of semi-space garbage
 collector in the context of a purely functional programming language.
 I will implement two optimizations in the garbage collector and evaluate these
-optimizations against the baseline.
+optimizations against the baseline. These two novel techniques, as well as the
+detailed measurements of their effects, are the primary contributions of this
+report.
 
 \section{Jikes RVM vs. native}
 \makecomment{Why I use a native GC rather than the Jikes RVM (Research Virtual Machine)
@@ -230,7 +232,7 @@ fragmentation and thus poor cache performance.
 \makecomment{Diagrams for this section: semi-space algorithm, moon's algorithm.}
 
 In 1969, Fenichel et al published an algorithm for copying the reachable objects
-into newly allocated memory chunk rather than merely marking them. Once the copying
+into newly allocated memory chunk rather than merely marking them.\cite{Fenichel} Once the copying
 is complete, all previously used memory will no longer contain live objects
 and can be reclaimed. This makes the "sweep" phases unnecessary and it gets rid
 of any fragmentation at the cost of requiring 2x available memory. The published
@@ -309,6 +311,9 @@ for tagging.}
 \makecomment{Which parts of LHC's architecture is important to describe? \cite{LHC}
 Include: Simplicity of the RTS, Compiles subset of Haskell, Generates high-level
 LLVM code, Similar memory model to GHC, Whole-program compiler.}
+
+\makecomment{Explain indirections. They are important for the implementation
+details of tail-pointer elimination.}
 
 \section{Related work}
 \subsection{Depth-first copying (two approaches)}
@@ -413,7 +418,7 @@ account.
 
 \section{Implementation}
 
-\subsection{Baseline garbage collector}
+\subsection{Baseline garbage collector}\label{algorithm}
 
 Before tail-first copy order and tail-pointer elimination can be implemented,
 a semi-space garbage collector needs to be written for LHC. While LHC didn't
@@ -450,8 +455,44 @@ the garbage collector.
 
 \subsection{Tail-first copy order}
 
-Keywords: 'evacuate' procedure, tail-recursive, give pointer to address of
-tail-pointer, new branch: has-children.
+\makecomment{Diagram: Flow-chart of the new 'evacuate' procedure.}
+
+The copy order of the garbage collector is entirely determined by the 'evacuate'
+procedure in the algorithm outlined in \ref{algorithm}. This produce takes the
+address of a heap object and performs the following steps:
+\begin{enumerate}
+  \item If the object is an indirection, follow the indirection. This step is
+  repeated until an actual heap object is found.
+  \item Check if the object is already in the \emph{to-space}. If so, nothing
+  more needs to be done and we can exit the procedure.
+  \item Lookup the size of the object and copy it to the next free spot in
+  \emph{to-space}.
+  \item Update the given address of the heap object to point to its new position
+  in the \emph{to-space}.
+  \item Overwrite the old heap object with an indirection to its new position.
+\end{enumerate}
+
+In some Haskell compilers, like GHC, indirections take up two words of memory
+(one for the tag and one for the pointer). This can cause problems when you're
+trying to overwrite heap objects that are smaller than two words. Luckily, in
+LHC, indirections only take up a single word and no special precautions are
+necessary. LHC is able to squeeze an indirection into a single word because
+all heap objects are word aligned and pointers to them therefore don't use the
+least significant 2 or 3 bits (for 32bit and 64bit systems, respectively).
+
+A key thing to note is that the 'evacuate' procedure only copies a single heap
+object and not the children of that object. This was the key changed proposed
+by Cheney to Fenichel's algorithm which recursively copied all children as well.
+\cite{Fenichel,Cheney:1970} Between these two approaches, there's a middle
+ground: Recursively copy a single child (if it exists). Doing so would be more
+likely to put related objects next to each other than breadth-first copy, and
+it still wouldn't require the stack space that a depth-first copy does.
+
+Introducing a check for children to the procedure, and recursing if it is true,
+does not add a significant amount of complexity. However, it is important to
+verify that the procedure is indeed tail-recursive. Otherwise it'll use an
+unbounded amount of stack space and undoubtedly fail for sufficiently large
+heaps.
 
 \subsection{Tail-pointer elimination}
 
@@ -471,10 +512,12 @@ Six different cases:
 \chapter{Evaluation}
 
 \section{Methodology}
-Keywords: 7 test programs with different allocation patterns, 12 measured metrics,
+\makecomment{Keywords: 7 test programs with different allocation patterns, 12 measured metrics,
 some allocation patterns are faster, some are slower, metrics measured internally
 (gc time, mut time, collections, allocated, copied), rest measured
-by 'perf', each program was run 5 times.
+by 'perf', each program was run 5 times.}
+
+\section{Verification}
 
 \section{Results and interpretation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
