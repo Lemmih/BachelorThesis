@@ -7,6 +7,9 @@
 \usepackage{url}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage{svg}
+\usepackage{subfig}
+\usepackage{pdfpages}
 \usepackage{multirow}
 \usepackage[autostyle]{csquotes}
 
@@ -174,7 +177,12 @@ Chapter 5 concludes the work and presents possible future work.
 
 \chapter{Background}
 \section{Processors, memory and cache}
-\makecomment{Diagrams for this section: memory hierarchy.}
+
+\begin{figure}
+  \centering
+  \includesvg[width=0.5\linewidth,inkscapelatex=false]{images/D7.svg}
+  \caption{Memory hierarchy.}
+\end{figure}
 
 CPUs used to run at similar frequencies as main memory, allowing them to read
 from memory at roughly the same speed that it could process the information.
@@ -201,6 +209,18 @@ that highlights this is matrix multiplication: The elements of the resulting
 matrix can be computed in any order but choosing a cache-friendly access pattern
 can be orders of magnitude faster.
 
+\begin{table}
+  \centering
+  \begin{tabular}{c | c}
+    To Where & Cycles \\ \hline
+    Register & $\le 1$ \\
+    L1d & $\sim 3$ \\
+    L2 & $\sim 14$ \\
+    Main Memory & $\sim 240$
+  \end{tabular}
+  \caption{Approximate access times for memory in an Intel Pentium M}
+\end{table}
+
 % Write about MESI and cache associativity
 
 \section{Manual memory management}
@@ -216,7 +236,11 @@ but performs less well in terms of throughput and locality.
 
 \section{Reference counting}
 \section{Mark-and-sweep}
-\makecomment{Diagrams for this section: mark-and-sweep.}
+\begin{figure}
+  \centering
+  \includesvg[width=0.8\linewidth,inkscapelatex=false]{images/D9.svg}
+  \caption{Mark-and-Sweep.}
+\end{figure}
 
 Unlike manual management and reference counting which never scans through all
 the heap allocated objects, tracing garbage collection involves finding all live
@@ -231,7 +255,16 @@ referenced but, similarly to manual management and reference counting, leads to
 fragmentation and thus poor cache performance.
 
 \section{Copying collectors}
-\makecomment{Diagrams for this section: semi-space algorithm, moon's algorithm.}
+\begin{figure}
+  \centering
+  \includesvg[height=2cm,inkscapelatex=false]{images/D8.svg}
+  \caption{Cheney's semi-space algorithm.}
+\end{figure}
+\begin{figure}[b]
+  \centering
+  \includesvg[height=2cm,inkscapelatex=false]{images/D10.svg}
+  \caption{Moon's algorithm.}
+\end{figure}
 
 In 1969, Fenichel et al published an algorithm for copying the reachable objects
 into newly allocated memory chunk rather than merely marking them.\cite{Fenichel} Once the copying
@@ -337,7 +370,7 @@ manifests themselves in niche situations (eg. with limited physical memory and
 a high cost of page faults). However, I think a compromise is possible that
 maintains most of the data locality benefits without hampering performance in
 the common case, making such an algorithm suitable as the default garbage
-collector.
+collector rather than just being useful in special cases.
 
 Between depth-first copying and breadth-first copying, there exist a middle-ground
 which I call tail-first copying. In this scheme, exactly one child of each node
@@ -496,21 +529,97 @@ verify that the procedure is indeed tail-recursive. Otherwise it'll use an
 unbounded amount of stack space and undoubtedly fail for sufficiently large
 heaps.
 
+
 \subsection{Tail-pointer elimination}
 
+\begin{figure}[t]
+  \includesvg[height=3.5cm, inkscapelatex=false]{images/D6.svg}
+  \caption{Evacuation of both child and parent nodes.}
+  \label{parent_child}
+\end{figure}
 
-Parent nodes can either be compacted or not compacted. Child nodes can be in
-three different states (already evacuated, indirection, untouched).
+\begin{figure}[b]
+  \includesvg[height=3.5cm, inkscapelatex=false]{images/D3.svg}
+  \caption{Evacuation of compacted parent and child.}
+  \label{compacted_parent_child}
+\end{figure}
 
-Six different cases:
-\begin{itemize}
-  \item Compacted parent with already evacuated child.
-  \item Compacted parent with indirection as child.
-  \item Compacted parent with untouched child.
-  \item Parent with already evacuated child.
-  \item Parent with indirection as child.
-  \item Parent with untouched child.
-\end{itemize}
+\begin{figure}[t]
+  \includesvg[height=3.5cm, inkscapelatex=false]{images/D2.svg}
+  \caption{Evacuation of compacted parent and modified child.}
+  \label{modified_child}
+\end{figure}
+
+The elimination of tail pointers is straight forward in the common case but there
+are two situations that add complexity: Firstly, objects are always mutated by
+replacing them with an indirection to a new object. In contrast to inplace updates,
+this approach allows small objects to be replaced by larger objects and the update
+happens atomically. The indirections are removed during garbage collection
+and should not inhibit tail-pointer elimination as long as all other requirements
+are met.
+Secondly, objects may have multiple parents but only a single pointer to an object
+can be eliminated. The pointer elimination happens on a first-come, first-served
+basis and the order may change between garbage collections such that children get
+placed next to a different parent each time. When this happens, the pointer
+that was previously eliminated will have to be restored.
+
+The tail-pointer elimination algorithm depends on whether the parent has a
+tail-pointer or not and whether the child has already been evacuated or not. This
+leads to four new cases that needs to be handled in the 'evacuate' procedure:
+\begin{enumerate}
+  \item Parent and child both in \emph{from-space}. Figure \ref{parent_child}
+    illustrates
+    how a compacted parent node is created in \emph{to-space} when both the parent
+    and child nodes were in \emph{from-space}. It should be noted that this
+    algorithm is recursive and the child node may itself be compacted if it
+    itself is a parent and its child satisfies the requirements. The figure also
+    shows that both the parent and child nodes in \emph{from-space} are replaced
+    by indirections. This guarantees that nodes are never duplicated (ie. copied
+    twice) during garbage collection, even when the nodes have multiple parents.
+
+  \item Compacted parent and child both in \emph{from-space}. Figure
+    \ref{compacted_parent_child} illustrates how compaction is maintained when
+    the child has been evacuated or moved. If the child is still available, it
+    is immediately moved together with its parent and no intermediate pointers
+    have to be introduced. As the algorithm is recursive and the child may also
+    be compacted, this leads to sequential blocks of memory being copied rather
+    than individual objects that may be scattered in memory.
+
+    Indirections that still point to \emph{from-space} can occur before any
+    child node and that case needs to be handled as well. Figure
+    \ref{modified_child} displays a situation where a child node was previously
+    placed next to its parent but then later modified (ie. replaced with an
+    indirection to a new object). Conceptually, indirections are transparent
+    and do not have any effect on semantics but they do add complexity to the
+    implementation. As a side note, a compacted parent with an indirection is
+    isomorphic to an ordinary parent with a tail-pointer.
+  \item Parent with evacuated child. Figure \ref{multiple_parents} illustrates
+    what happens when a child node has already been evacuated. This can happen
+    when the child has multiple parents or if the child was part of the initial
+    root set. In this case, the parent cannot be placed right above the child
+    and its therefore copied verbatim instead, keeping the tail-pointer intact.
+  \item Compacted parent with evacuated child. Figure \ref{parent_no_child}
+    illustrates a situation where the child node most likely has multiple parents
+    and is now placed next to a different parent. Here a new tail-pointer has to
+    be introduced between the parent and the child.
+\end{enumerate}
+
+\begin{figure}[b]
+  \includesvg[height=3.5cm, inkscapelatex=false]{images/D4.svg}
+  \caption{Evacuation of parent only.}
+  \label{multiple_parents}
+\end{figure}
+
+
+\begin{figure}
+  \includesvg[height=3.5cm, inkscapelatex=false]{images/D1.svg}
+  \caption{Evacuation of compacted parent while introducing new child pointer.}
+  \label{parent_no_child}
+\end{figure}
+
+
+
+
 
 \chapter{Evaluation}
 
