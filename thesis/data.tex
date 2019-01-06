@@ -1,0 +1,591 @@
+\begin{table}
+  \begin{ltable}{Mutator time}{muttable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Mutator time:}\\
+    \hline
+    \textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
+    Allocate   &3.3s &+0.1\% &+0.1\% \\
+    BinTree    &3.4s &-0.2\% &-0.3\% \\
+    Bush       &2.4s &-0.1\% &-0.5\% \\
+    BushTail   &3.6s &+0.4\% &+0.2\% \\
+    Imbalanced &2.7s &+0.0\% &-0.2\% \\
+    MemBench   &3.5s &+0.1\% &+0.0\% \\
+    PowerSet   &6.9s &+0.1\% &+0.1\% \\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-0.2\%&-0.5\%\\
+    \multicolumn{2}{|l|}{Max}&0.4\%&0.2\%\\
+    \multicolumn{2}{|l|}{Mean}&0.0\%&-0.1\%\\
+    \hline
+
+    }
+  \end{ltable}
+  \begin{rtable}{GC time}{gctable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{GC time:}\\
+    \hline
+    \textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
+    Allocate   &3.8s  &+19.3\% &+9.3\% \\
+    BinTree    &4.5s  &+15.7\% &+10.0\%\\
+    Bush       &2.7s  &+12.2\% &+9.4\% \\
+    BushTail   &3.5s  &+11.9\% &+7.0\% \\
+    Imbalanced &3.8s  &+1.4\%  &-3.8\% \\
+    MemBench   &7.8s  &-28.1\% &-31.7\%\\
+    PowerSet   &12.3s &-30.5\% &-34.2\%\\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-30.5\%&-34.2\%\\
+    \multicolumn{2}{|l|}{Max}&19.3\%&10.0\%\\
+    \multicolumn{2}{|l|}{Mean}&0.3\%&-4.9\%\\
+    \hline
+    }
+  \end{rtable}
+\end{table}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Heap size and allocations tables
+
+\begin{table}
+  \begin{ltable}{Heap size}{coltable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Heap size:}\\
+    \hline
+    \textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
+    Allocate   &1.8 gb &+0.0\% &+0.0\% \\
+    BinTree    &1.5 gb &+0.0\% &+0.0\% \\
+    Bush       &1.0 gb &+0.0\% &+0.0\% \\
+    BushTail   &1.6 gb &+0.0\% &+0.0\% \\
+    Imbalanced &1.3 gb &+0.0\% &+0.0\% \\
+    MemBench   &1.4 gb &+0.0\% &+0.0\% \\
+    PowerSet   &1.5 gb &+0.0\% &+0.0\% \\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&0.0\%&0.0\%\\
+    \multicolumn{2}{|l|}{Max}&0.0\%&0.0\%\\
+    \multicolumn{2}{|l|}{Mean}&0.0\%&0.0\%\\
+    \hline
+    }
+  \end{ltable}
+  \begin{rtable}{Allocations}{alloctable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Allocated:}\\
+    \hline
+    \textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
+    Allocate   &9.0 gb  &+0.0\% &+0.0\% \\
+    BinTree    &9.8 gb  &+0.0\% &+0.0\% \\
+    Bush       &6.6 gb  &+0.0\% &+0.0\% \\
+    BushTail   &5.2 gb  &+0.0\% &+0.0\% \\
+    Imbalanced &7.8 gb  &+0.0\% &+0.0\% \\
+    MemBench   &9.7 gb  &+0.0\% &+0.0\% \\
+    PowerSet   &15.1 gb &+0.0\% &+0.0\% \\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&0.0\%&0.0\%\\
+    \multicolumn{2}{|l|}{Max}&0.0\%&0.0\%\\
+    \multicolumn{2}{|l|}{Mean}&0.0\%&0.0\%\\
+    \hline
+    }
+  \end{rtable}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Copied and page-faults
+
+\begin{table}
+  \begin{ltable}{Copied by GC}{copiedtable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Copied:}\\
+    \hline
+    \textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
+    Allocate   &4.9 gb &+0.0\% &-33.3\% \\
+    BinTree    &3.8 gb &+0.0\% &-25.0\% \\
+    Bush       &2.5 gb &+0.0\% &-12.5\% \\
+    BushTail   &3.1 gb &+0.0\% &-19.9\% \\
+    Imbalanced &3.0 gb &+0.0\% &-25.0\% \\
+    MemBench   &4.9 gb &+0.0\% &-20.0\% \\
+    PowerSet   &7.6 gb &+0.0\% &-20.0\% \\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&0.0\%&-33.3\%\\
+    \multicolumn{2}{|l|}{Max}&0.0\%&-12.5\%\\
+    \multicolumn{2}{|l|}{Mean}&0.0\%&-22.2\%\\
+    \hline
+    }
+  \end{ltable}
+  \begin{rtable}{Page faults}{pagetable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Page faults (millions):}\\
+    \hline
+    \textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
+    Allocate   &4.0 &+0.0\% &-10.7\%\\
+    BinTree    &3.6 &+0.0\% &-6.8\% \\
+    Bush       &2.6 &-0.0\% &-3.2\% \\
+    BushTail   &3.3 &-0.0\% &-5.0\% \\
+    Imbalanced &2.9 &+0.0\% &-7.0\% \\
+    MemBench   &4.1 &+0.0\% &-6.3\% \\
+    PowerSet   &7.7 &-0.0\% &-5.2\% \\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-0.0\%&-10.7\%\\
+    \multicolumn{2}{|l|}{Max}&0.0\%&-3.2\%\\
+    \multicolumn{2}{|l|}{Mean}&-0.0\%&-6.3\%\\
+    \hline
+    }
+  \end{rtable}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Copied and page-faults
+
+\begin{table}
+  \begin{ltable}{Cycles}{cycletable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Cycles (billions):}\\
+    \hline
+    \textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
+    Allocate   &29.3 &+11.2\% &+4.7\%  \\
+    BinTree    &32.5 &+9.9\%  &+6.0\%  \\
+    Bush       &21.1 &+6.0\%  &+4.5\%  \\
+    BushTail   &29.4 &+5.5\%  &+3.2\%  \\
+    Imbalanced &26.8 &+0.8\%  &-2.4\%  \\
+    MemBench   &46.0 &-18.8\% &-21.7\% \\
+    PowerSet   &79.1 &-19.1\% &-21.4\% \\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-19.1\%&-21.7\%\\
+    \multicolumn{2}{|l|}{Max}&11.2\%&6.0\%\\
+    \multicolumn{2}{|l|}{Mean}&-0.6\%&-3.9\%\\
+    \hline
+    }
+  \end{ltable}
+  \begin{rtable}{Instructions}{insttable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Instructions (billions):}\\
+    \hline
+    \textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
+    Allocate   &60.0 &-3.3\% &-1.5\% \\
+    BinTree    &48.6 &-1.3\% &+0.0\% \\
+    Bush       &32.3 &-0.5\% &+0.1\% \\
+    BushTail   &40.2 &-2.1\% &-1.1\% \\
+    Imbalanced &39.1 &-1.4\% &+0.2\% \\
+    MemBench   &52.9 &-1.4\% &-0.1\% \\
+    PowerSet   &92.7 &-1.1\% &-0.1\% \\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-3.3\%&-1.5\%\\
+    \multicolumn{2}{|l|}{Max}&-0.5\%&0.2\%\\
+    \multicolumn{2}{|l|}{Mean}&-1.6\%&-0.4\%\\
+    \hline
+    }
+  \end{rtable}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% branches and branch misses
+
+\begin{table}
+  \begin{ltable}{Branches}{branchtable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Branches (billions):}\\
+    \hline
+    \textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
+    Allocate   &11.1 &-3.7\% &-0.8\% \\
+    BinTree    &8.6  &-1.5\% &+1.7\% \\
+    Bush       &5.7  &+1.1\% &+2.1\% \\
+    BushTail   &7.1  &-2.0\% &+0.4\% \\
+    Imbalanced &6.8  &-1.7\% &+1.5\% \\
+    MemBench   &9.4  &-1.5\% &+1.0\% \\
+    PowerSet   &16.2 &-1.4\% &+0.8\% \\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-3.7\%&-0.8\%\\
+    \multicolumn{2}{|l|}{Max}&1.1\%&2.1\%\\
+    \multicolumn{2}{|l|}{Mean}&-1.5\%&1.0\%\\
+    \hline
+    }
+  \end{ltable}
+  \begin{rtable}{Branch misses}{branchmisstable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{Branch Misses (millions):}\\
+    \hline
+    \textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
+    Allocate   &8.5  &-5.9\%  &-16.7\% \\
+    BinTree    &30.3 &+88.6\% &+85.6\% \\
+    Bush       &17.4 &+81.5\% &+88.2\% \\
+    BushTail   &16.2 &+41.2\% &+39.0\% \\
+    Imbalanced &33.7 &+9.1\%  &+5.8\%  \\
+    MemBench   &10.6 &-8.6\%  &-13.4\% \\
+    PowerSet   &19.8 &-7.3\%  &-10.9\% \\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-8.6\%&-16.7\%\\
+    \multicolumn{2}{|l|}{Max}&88.6\%&88.2\%\\
+    \multicolumn{2}{|l|}{Mean}&28.4\%&25.4\%\\
+    \hline
+    }
+  \end{rtable}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% LLC loads and LLC misses
+
+\begin{table}
+  \begin{ltable}{LLC loads}{llctable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{LLC Loads (millions):}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate   &9.4   &+36.2\% &+4.7\%  \\
+    BinTree    &71.2  &-1.0\%  &-3.8\%  \\
+    Bush       &38.4  &+9.6\%  &+7.4\%  \\
+    BushTail   &62.5  &-1.5\%  &-3.6\%  \\
+    Imbalanced &50.2  &-9.4\%  &-12.5\% \\
+    MemBench   &186.1 &-87.5\% &-87.8\% \\
+    PowerSet   &299.8 &-87.6\% &-88.0\% \\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-87.6\%&-88.0\%\\
+    \multicolumn{2}{|l|}{Max}&36.2\%&7.4\%\\
+    \multicolumn{2}{|l|}{Mean}&-20.2\%&-26.2\%\\
+    \hline
+    }
+  \end{ltable}
+  \begin{rtable}{LLC load misses}{llcmisstable}
+    \data{
+    \hline
+    \multicolumn{4}{|c|}{LLC Load Misses (millions):}\\
+    \hline
+    Name&Baseline&Tail-copy&Tail-compact\\
+    Allocate   &4.5    &+4.1\%  &-0.7\%  \\
+    BinTree    &61.3   &-2.8\%  &-3.0\%  \\
+    Bush       &33.0   &+9.0\%  &+8.9\%  \\
+    BushTail   &53.5   &-3.3\%  &-5.0\%  \\
+    Imbalanced &42.0   &-12.2\% &-10.9\% \\
+    MemBench   &84.0   &-78.6\% &-78.4\% \\
+    PowerSet   &132.4  &-78.6\% &-78.3\% \\
+    \hline
+    \hline
+    \multicolumn{2}{|l|}{Min}&-78.6\%&-78.4\%\\
+    \multicolumn{2}{|l|}{Max}&9.0\%&8.9\%\\
+    \multicolumn{2}{|l|}{Mean}&-23.2\%&-23.9\%\\
+    \hline
+    }
+  \end{rtable}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% \begin{table}
+%   \begin{ltable}{Mutator time}{muttable}
+%     \data{
+%     \hline
+%     \multicolumn{4}{|c|}{Mutator times:}\\
+%     \hline
+%     Name&Baseline&Tail-copy&Tail-compact\\
+%     Allocate&3.3s (±0.5\%)&+0.1\% (±0.2\%)&+0.1\% (±0.5\%)\\
+%     BinTree&3.4s (±0.1\%)&-0.2\% (±0.3\%)&-0.3\% (±0.2\%)\\
+%     Bush&2.4s (±0.2\%)&-0.1\% (±0.5\%)&-0.5\% (±0.3\%)\\
+%     BushTail&3.6s (±0.4\%)&+0.4\% (±0.3\%)&+0.2\% (±0.4\%)\\
+%     Imbalanced&2.7s (±0.3\%)&+0.0\% (±0.1\%)&-0.2\% (±0.4\%)\\
+%     MemBench&3.5s (±0.2\%)&+0.1\% (±0.2\%)&+0.0\% (±0.2\%)\\
+%     PowerSet&6.9s (±0.2\%)&+0.1\% (±0.3\%)&+0.1\% (±0.2\%)\\
+%     \hline
+%     \hline
+%     \multicolumn{2}{|l|}{Min}&-0.2\%&-0.5\%\\
+%     \multicolumn{2}{|l|}{Max}&0.4\%&0.2\%\\
+%     \multicolumn{2}{|l|}{Mean}&0.0\%&-0.1\%\\
+%     \hline
+%
+%     }
+%   \end{ltable}
+%   \begin{rtable}{GC time}{gctable}
+%     \data{
+%     \hline
+%     \multicolumn{4}{|c|}{GC times:}\\
+%     \hline
+%     Name&Baseline&Tail-copy&Tail-compact\\
+%     Allocate&3.8s (±0.3\%)&+19.3\% (±0.2\%)&+9.3\% (±0.1\%)\\
+%     BinTree&4.5s (±0.2\%)&+15.7\% (±0.3\%)&+10.0\% (±0.1\%)\\
+%     Bush&2.7s (±0.3\%)&+12.2\% (±0.4\%)&+9.4\% (±0.4\%)\\
+%     BushTail&3.5s (±0.7\%)&+11.9\% (±0.3\%)&+7.0\% (±1.8\%)\\
+%     Imbalanced&3.8s (±0.2\%)&+1.4\% (±0.7\%)&-3.8\% (±0.3\%)\\
+%     MemBench&7.8s (±1.1\%)&-28.1\% (±0.8\%)&-31.7\% (±0.6\%)\\
+%     PowerSet&12.3s (±0.8\%)&-30.5\% (±0.3\%)&-34.2\% (±0.4\%)\\
+%     \hline
+%     \hline
+%     \multicolumn{2}{|l|}{Min}&-30.5\%&-34.2\%\\
+%     \multicolumn{2}{|l|}{Max}&19.3\%&10.0\%\\
+%     \multicolumn{2}{|l|}{Mean}&0.3\%&-4.9\%\\
+%     \hline
+%     }
+%   \end{rtable}
+% \end{table}
+%
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% Heap size and allocations tables
+%
+% \begin{table}
+%   \begin{ltable}{Collections}{coltable}
+%     \data{
+%     \hline
+%     \multicolumn{4}{|c|}{Heap size:}\\
+%     \hline
+%     Name&Baseline&Tail-copy&Tail-compact\\
+%     Allocate&1.8 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     BinTree&1.5 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     Bush&1.0 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     BushTail&1.6 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     Imbalanced&1.3 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     MemBench&1.4 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     PowerSet&1.5 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     \hline
+%     \hline
+%     \multicolumn{2}{|l|}{Min}&0.0\%&0.0\%\\
+%     \multicolumn{2}{|l|}{Max}&0.0\%&0.0\%\\
+%     \multicolumn{2}{|l|}{Mean}&0.0\%&0.0\%\\
+%     \hline
+%     }
+%   \end{ltable}
+%   \begin{rtable}{Allocations}{alloctable}
+%     \data{
+%     \hline
+%     \multicolumn{4}{|c|}{Allocated:}\\
+%     \hline
+%     Name&Baseline&Tail-copy&Tail-compact\\
+%     Allocate&9.0 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     BinTree&9.8 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     Bush&6.6 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     BushTail&5.2 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     Imbalanced&7.8 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     MemBench&9.7 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     PowerSet&15.1 gb (±0.0\%)&+0.0\% (±0.0\%)&+0.0\% (±0.0\%)\\
+%     \hline
+%     \hline
+%     \multicolumn{2}{|l|}{Min}&0.0\%&0.0\%\\
+%     \multicolumn{2}{|l|}{Max}&0.0\%&0.0\%\\
+%     \multicolumn{2}{|l|}{Mean}&0.0\%&0.0\%\\
+%     \hline
+%     }
+%   \end{rtable}
+% \end{table}
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% Copied and page-faults
+%
+% \begin{table}
+%   \begin{ltable}{Copied}{copiedtable}
+%     \data{
+%     \hline
+%     \multicolumn{4}{|c|}{Copied:}\\
+%     \hline
+%     Name&Baseline&Tail-copy&Tail-compact\\
+%     Allocate&4.9 gb (±0.0\%)&+0.0\% (±0.0\%)&-33.3\% (±0.0\%)\\
+%     BinTree&3.8 gb (±0.0\%)&+0.0\% (±0.0\%)&-25.0\% (±0.0\%)\\
+%     Bush&2.5 gb (±0.0\%)&+0.0\% (±0.0\%)&-12.5\% (±0.0\%)\\
+%     BushTail&3.1 gb (±0.0\%)&+0.0\% (±0.0\%)&-19.9\% (±0.0\%)\\
+%     Imbalanced&3.0 gb (±0.0\%)&+0.0\% (±0.0\%)&-25.0\% (±0.0\%)\\
+%     MemBench&4.9 gb (±0.0\%)&+0.0\% (±0.0\%)&-20.0\% (±0.0\%)\\
+%     PowerSet&7.6 gb (±0.0\%)&+0.0\% (±0.0\%)&-20.0\% (±0.0\%)\\
+%     \hline
+%     \hline
+%     \multicolumn{2}{|l|}{Min}&0.0\%&-33.3\%\\
+%     \multicolumn{2}{|l|}{Max}&0.0\%&-12.5\%\\
+%     \multicolumn{2}{|l|}{Mean}&0.0\%&-22.2\%\\
+%     \hline
+%     }
+%   \end{ltable}
+%   \begin{rtable}{Page faults}{pagetable}
+%     \data{
+%     \hline
+%     \multicolumn{4}{|c|}{Page faults:}\\
+%     \hline
+%     Name&Baseline&Tail-copy&Tail-compact\\
+%     Allocate&4.0 mil (±0.0\%)&+0.0\% (±0.0\%)&-10.7\% (±0.0\%)\\
+%     BinTree&3.6 mil (±0.0\%)&+0.0\% (±0.0\%)&-6.8\% (±0.0\%)\\
+%     Bush&2.6 mil (±0.0\%)&-0.0\% (±0.0\%)&-3.2\% (±0.0\%)\\
+%     BushTail&3.3 mil (±0.0\%)&-0.0\% (±0.0\%)&-5.0\% (±0.0\%)\\
+%     Imbalanced&2.9 mil (±0.0\%)&+0.0\% (±0.0\%)&-7.0\% (±0.0\%)\\
+%     MemBench&4.1 mil (±0.0\%)&+0.0\% (±0.0\%)&-6.3\% (±0.0\%)\\
+%     PowerSet&7.7 mil (±0.0\%)&-0.0\% (±0.0\%)&-5.2\% (±0.0\%)\\
+%     \hline
+%     \hline
+%     \multicolumn{2}{|l|}{Min}&-0.0\%&-10.7\%\\
+%     \multicolumn{2}{|l|}{Max}&0.0\%&-3.2\%\\
+%     \multicolumn{2}{|l|}{Mean}&-0.0\%&-6.3\%\\
+%     \hline
+%     }
+%   \end{rtable}
+% \end{table}
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% Copied and page-faults
+%
+% \begin{table}
+%   \begin{ltable}{Cycles}{cycletable}
+%     \data{
+%     \hline
+%     \multicolumn{4}{|c|}{Cycles (billions):}\\
+%     \hline
+%     Name&Baseline&Tail-copy&Tail-compact\\
+%     Allocate&29.3 (±0.7\%)&+11.2\% (±0.4\%)&+4.7\% (±0.4\%)\\
+%     BinTree&32.5 (±0.3\%)&+9.9\% (±2.9\%)&+6.0\% (±1.4\%)\\
+%     Bush&21.1 (±3.2\%)&+6.0\% (±0.1\%)&+4.5\% (±0.3\%)\\
+%     BushTail&29.4 (±0.1\%)&+5.5\% (±0.1\%)&+3.2\% (±0.3\%)\\
+%     Imbalanced&26.8 (±0.2\%)&+0.8\% (±0.3\%)&-2.4\% (±0.3\%)\\
+%     MemBench&46.0 (±0.5\%)&-18.8\% (±0.1\%)&-21.7\% (±0.3\%)\\
+%     PowerSet&79.1 (±0.3\%)&-19.1\% (±0.2\%)&-21.4\% (±0.7\%)\\
+%     \hline
+%     \hline
+%     \multicolumn{2}{|l|}{Min}&-19.1\%&-21.7\%\\
+%     \multicolumn{2}{|l|}{Max}&11.2\%&6.0\%\\
+%     \multicolumn{2}{|l|}{Mean}&-0.6\%&-3.9\%\\
+%     \hline
+%     }
+%   \end{ltable}
+%   \begin{rtable}{Instructions}{insttable}
+%     \data{
+%     \hline
+%     \multicolumn{4}{|c|}{Instructions (billions):}\\
+%     \hline
+%     Name&Baseline&Tail-copy&Tail-compact\\
+%     Allocate&60.0 (±0.1\%)&-3.3\% (±0.1\%)&-1.5\% (±0.1\%)\\
+%     BinTree&48.6 (±0.4\%)&-1.3\% (±0.3\%)&+0.0\% (±1.0\%)\\
+%     Bush&32.3 (±0.5\%)&-0.5\% (±0.4\%)&+0.1\% (±0.3\%)\\
+%     BushTail&40.2 (±0.5\%)&-2.1\% (±0.4\%)&-1.1\% (±0.3\%)\\
+%     Imbalanced&39.1 (±0.5\%)&-1.4\% (±0.2\%)&+0.2\% (±0.2\%)\\
+%     MemBench&52.9 (±0.1\%)&-1.4\% (±0.1\%)&-0.1\% (±0.2\%)\\
+%     PowerSet&92.7 (±0.1\%)&-1.1\% (±0.1\%)&-0.1\% (±0.1\%)\\
+%     \hline
+%     \hline
+%     \multicolumn{2}{|l|}{Min}&-3.3\%&-1.5\%\\
+%     \multicolumn{2}{|l|}{Max}&-0.5\%&0.2\%\\
+%     \multicolumn{2}{|l|}{Mean}&-1.6\%&-0.4\%\\
+%     \hline
+%     }
+%   \end{rtable}
+% \end{table}
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% branches and branch misses
+%
+% \begin{table}
+%   \begin{ltable}{Branches}{branchtable}
+%     \data{
+%     \hline
+%     \multicolumn{4}{|c|}{Branches (billion):}\\
+%     \hline
+%     Name&Baseline&Tail-copy&Tail-compact\\
+%     Allocate&11.1 (±0.1\%)&-3.7\% (±0.3\%)&-0.8\% (±0.1\%)\\
+%     BinTree&8.6 (±0.2\%)&-1.5\% (±0.3\%)&+1.7\% (±0.3\%)\\
+%     Bush&5.7 (±0.6\%)&+1.1\% (±1.0\%)&+2.1\% (±0.3\%)\\
+%     BushTail&7.1 (±0.5\%)&-2.0\% (±0.3\%)&+0.4\% (±0.3\%)\\
+%     Imbalanced&6.8 (±0.5\%)&-1.7\% (±0.4\%)&+1.5\% (±0.4\%)\\
+%     MemBench&9.4 (±0.1\%)&-1.5\% (±0.2\%)&+1.0\% (±0.2\%)\\
+%     PowerSet&16.2 (±0.2\%)&-1.4\% (±0.0\%)&+0.8\% (±0.1\%)\\
+%     \hline
+%     \hline
+%     \multicolumn{2}{|l|}{Min}&-3.7\%&-0.8\%\\
+%     \multicolumn{2}{|l|}{Max}&1.1\%&2.1\%\\
+%     \multicolumn{2}{|l|}{Mean}&-1.5\%&1.0\%\\
+%     \hline
+%     }
+%   \end{ltable}
+%   \begin{rtable}{Branch misses}{branchmisstable}
+%     \data{
+%     \hline
+%     \multicolumn{4}{|c|}{Branch Misses (million):}\\
+%     \hline
+%     Name&Baseline&Tail-copy&Tail-compact\\
+%     Allocate&8.5 (±4.1\%)&-5.9\% (±0.7\%)&-16.7\% (±0.7\%)\\
+%     BinTree&30.3 (±0.5\%)&+88.6\% (±0.3\%)&+85.6\% (±0.5\%)\\
+%     Bush&17.4 (±1.0\%)&+81.5\% (±0.6\%)&+88.2\% (±0.1\%)\\
+%     BushTail&16.2 (±0.8\%)&+41.2\% (±0.6\%)&+39.0\% (±0.4\%)\\
+%     Imbalanced&33.7 (±0.4\%)&+9.1\% (±0.3\%)&+5.8\% (±0.4\%)\\
+%     MemBench&10.6 (±0.9\%)&-8.6\% (±0.7\%)&-13.4\% (±1.0\%)\\
+%     PowerSet&19.8 (±0.6\%)&-7.3\% (±0.8\%)&-10.9\% (±0.8\%)\\
+%     \hline
+%     \hline
+%     \multicolumn{2}{|l|}{Min}&-8.6\%&-16.7\%\\
+%     \multicolumn{2}{|l|}{Max}&88.6\%&88.2\%\\
+%     \multicolumn{2}{|l|}{Mean}&28.4\%&25.4\%\\
+%     \hline
+%     }
+%   \end{rtable}
+% \end{table}
+%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% LLC loads and LLC misses
+%
+% \begin{table}
+%   \begin{ltable}{LLC loads}{llctable}
+%     \data{
+%     \hline
+%     \multicolumn{4}{|c|}{LLC Loads:}\\
+%     \hline
+%     Name&Baseline&Tail-copy&Tail-compact\\
+%     Allocate&9.4 million (±7.4\%)&+36.2\% (±3.3\%)&+4.7\% (±1.4\%)\\
+%     BinTree&71.2 million (±2.4\%)&-1.0\% (±1.4\%)&-3.8\% (±2.4\%)\\
+%     Bush&38.4 million (±0.8\%)&+9.6\% (±3.0\%)&+7.4\% (±1.0\%)\\
+%     BushTail&62.5 million (±5.0\%)&-1.5\% (±3.5\%)&-3.6\% (±2.7\%)\\
+%     Imbalanced&50.2 million (±0.7\%)&-9.4\% (±1.4\%)&-12.5\% (±1.1\%)\\
+%     MemBench&186.1 million (±0.3\%)&-87.5\% (±1.6\%)&-87.8\% (±2.9\%)\\
+%     PowerSet&299.8 million (±0.7\%)&-87.6\% (±1.1\%)&-88.0\% (±5.8\%)\\
+%     \hline
+%     \hline
+%     \multicolumn{2}{|l|}{Min}&-87.6\%&-88.0\%\\
+%     \multicolumn{2}{|l|}{Max}&36.2\%&7.4\%\\
+%     \multicolumn{2}{|l|}{Mean}&-20.2\%&-26.2\%\\
+%     \hline
+%     }
+%   \end{ltable}
+%   \begin{rtable}{LLC load misses}{llcmisstable}
+%     \data{
+%     \hline
+%     \multicolumn{4}{|c|}{LLC Load Misses:}\\
+%     \hline
+%     Name&Baseline&Tail-copy&Tail-compact\\
+%     Allocate&4.5 million (±4.2\%)&+4.1\% (±0.9\%)&-0.7\% (±3.7\%)\\
+%     BinTree&61.3 million (±1.0\%)&-2.8\% (±2.6\%)&-3.0\% (±1.0\%)\\
+%     Bush&33.0 million (±2.0\%)&+9.0\% (±2.5\%)&+8.9\% (±3.0\%)\\
+%     BushTail&53.5 million (±5.7\%)&-3.3\% (±3.6\%)&-5.0\% (±2.8\%)\\
+%     Imbalanced&42.0 million (±1.4\%)&-12.2\% (±1.0\%)&-10.9\% (±2.5\%)\\
+%     MemBench&84.0 million (±0.5\%)&-78.6\% (±0.8\%)&-78.4\% (±0.5\%)\\
+%     PowerSet&132.4 million (±0.8\%)&-78.6\% (±2.3\%)&-78.3\% (±8.1\%)\\
+%     \hline
+%     \hline
+%     \multicolumn{2}{|l|}{Min}&-78.6\%&-78.4\%\\
+%     \multicolumn{2}{|l|}{Max}&9.0\%&8.9\%\\
+%     \multicolumn{2}{|l|}{Mean}&-23.2\%&-23.9\%\\
+%     \hline
+%     }
+%   \end{rtable}
+% \end{table}
