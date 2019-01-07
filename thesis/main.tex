@@ -1,132 +1,16 @@
 \documentclass[a4paper,oneside]{memoir}
-\usepackage[english]{babel}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{wallpaper}
-\usepackage{palatino}
-\usepackage{url}
-\usepackage{graphicx}
-\usepackage{tikz}
-\usepackage{svg}
-\usepackage{subfig}
-\usepackage{pdfpages}
-\usepackage{multirow}
-\usepackage{listings}
-\usepackage[autostyle]{csquotes}
 
-\newcommand{\makecomment}[1]{{\color{red} Comment: #1}}
-
-
-\newenvironment{ltable}[2]
-{\hspace*{-2.0cm}\begin{minipage}{0.5\linewidth}
-  \centering
-  \caption{#1}
-  \label{#2}}
-{\end{minipage}}
-
-\newenvironment{rtable}[2]
-{\hspace*{3cm}\begin{minipage}{0.5\linewidth}
-  \centering
-  \caption{#1}
-  \label{#2}}
-{\end{minipage}}
-
-\newcommand{\data}[1]{{
-\resizebox{7cm}{!}{%
-\begin{tabular}{|l|c|c|c|}
-  #1
-\end{tabular}}
-}}
-
-\setcounter{secnumdepth}{3}
-% \setcounter{tocdepth}{3}
-
-\input{styles/jenor}
-\input{styles/hansen}
-
-% \usepackage{titlesec, blindtext, color}
-% \definecolor{gray75}{gray}{0.75}
-% \newcommand{\hsp}{\hspace{20pt}}
-% \titleformat{\chapter}[hang]{\Huge\bfseries}{\thechapter\hsp\textcolor{gray75}{|}\hsp}{0pt}{\Huge\bfseries}
-
-% Setup captions
-%\captionstyle[\centering]{\centering}
-%\changecaptionwidth
-%\captionwidth{0.8\linewidth}
-
-% Protect against widows and orphans
-%\clubpenalty=10000
-%\widowpenalty=10000
-
-%\linespread{1.2}
-
-%\raggedbottom
-
-% \chapterstyle{ger}
-% \chapterstyle{ell}
-% \chapterstyle{companion}
-% \chapterstyle{hangnum}
-% \chapterstyle{lyhne} % OKish
-\chapterstyle{madsen} % OK
-% \chapterstyle{jenor} % Font too big
-% \chapterstyle{wilsondob}
-% \chapterstyle{hansen} % OK
-
-%\maxsecnumdepth{subsection}
-
-%%  Setup fancy style quotation
-%%  ==================================================================
-%\usepackage{tikz}
-%\usepackage{framed}
-
-%\newcommand*\quotefont{\fontfamily{fxl}} % selects Libertine for quote font
-
-% Make commands for the quotes
-%\newcommand*{\openquote}{\tikz[remember picture,overlay,xshift=-15pt,yshift=-10pt]
-%     \node (OQ) {\quotefont\fontsize{60}{60}\selectfont``};\kern0pt}
-%\newcommand*{\closequote}{\tikz[remember picture,overlay,xshift=15pt,yshift=5pt]
-%     \node (CQ) {\quotefont\fontsize{60}{60}\selectfont''};}
-
-% select a colour for the shading
-%\definecolor{shadecolor}{rgb}{1,1,1}
-
-% wrap everything in its own environment
-%\newenvironment{shadequote}%
-%{\begin{snugshade}\begin{quote}\openquote}
-%{\hfill\closequote\end{quote}\end{snugshade}}
+\input{thesis/preamble}
 
 %%  Begin document
 %%  ==================================================================
 \begin{document}
 
-%%  Begin title page
-%%  ==================================================================
-    \thispagestyle{empty}
-    \ULCornerWallPaper{1}{cover/nat-farve.pdf}
-    \ULCornerWallPaper{1}{cover/nat-en.pdf}
-    \begin{adjustwidth}{-3cm}{-1.5cm}
-    \vspace*{-1cm}
-    \textbf{\Huge Bachelor Thesis} \\
-    \vspace*{2.5cm} \\
-    \textbf{\Huge Cache optimizations in garbage collection} \\
-    \vspace*{.1cm} \\
-    {\huge Opportunistically selecting cache-frindly object layouts} \\
-    \begin{tabbing}
-    % adjust the hspace below for the longest author name
-    David Himmelstrup \hspace{1cm} \= \texttt{<vrs552@alumni.ku.dk>} \\
-    \\[12cm]
-    \textbf{\Large Supervisor} \\
-    Fritz Henglein \> \texttt{<henglein@diku.dk>} \\
-    \end{tabbing}
-    \end{adjustwidth}
-    \newpage
-    \ClearWallPaper
-%%  ==================================================================
-%%  End title page
+\input{thesis/titlepage}
 
 \chapter*{Abstract}
 
-\input{thesis/abstract.tex}
+\input{thesis/abstract}
 
 \newpage
 
@@ -651,7 +535,7 @@ are correct.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Mutator and GC tables
 
-\input{thesis/data.tex}
+\input{thesis/data}
 
 \chapter{Conclusion}
 
