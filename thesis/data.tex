@@ -1,4 +1,45 @@
 \begin{table}
+  \hspace*{-1cm}\begin{minipage}{0.5\linewidth}
+    \centering
+    \caption{"BinTree" distances}
+    \resizebox{!}{2cm}{\begin{tabular}{|l|c|c|}
+      \hline
+      \multicolumn{3}{|c|}{Object distances:}\\
+      \hline
+      \textbf{Bucket}&\textbf{Baseline}&\textbf{Tail-copy}\\
+      <64 b        &523           &114053463\\
+      <4 kb        &26349         &6616\\
+      <64 kb       &423445        &211347\\
+      <512 kb      &2810463       &1564876\\
+      <2 mb        &7874711       &4414888\\
+      >2 mb        &216971852     &107856153\\
+      \hline
+    \end{tabular}}
+  \end{minipage}%
+  \hspace*{2cm}\begin{minipage}{0.5\linewidth}
+    \centering
+    \caption{"Allocate" distances}
+    \resizebox{!}{2cm}{\begin{tabular}{|l|c|c|}
+      \hline
+      \multicolumn{3}{|c|}{Object distances:}\\
+      \hline
+      \textbf{Bucket}&\textbf{Baseline}&\textbf{Tail-copy}\\
+      <64 b        &79930413           &79930435           \\
+      <4 kb        &3378         &3360           \\
+      <64 kb       &51200        &51200           \\
+      <512 kb      &361736       &361736           \\
+      <2 mb        &1029416       &1029408           \\
+      >2 mb        &78484699     &78484703           \\
+      \hline
+    \end{tabular}}
+  \end{minipage}
+\end{table}
+
+
+
+
+
+\begin{table}
   \begin{ltable}{Mutator time}{muttable}
     \data{
     \hline

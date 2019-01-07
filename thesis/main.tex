@@ -96,6 +96,7 @@ can be orders of magnitude faster.
 
 \begin{table}
   \centering
+  \caption{Approximate access times for memory in an Intel Pentium M}
   \begin{tabular}{c | c}
     To Where & Cycles \\ \hline
     Register & $\le 1$ \\
@@ -103,7 +104,6 @@ can be orders of magnitude faster.
     L2 & $\sim 14$ \\
     Main Memory & $\sim 240$
   \end{tabular}
-  \caption{Approximate access times for memory in an Intel Pentium M}
 \end{table}
 
 % Write about MESI and cache associativity
@@ -121,7 +121,7 @@ but performs less well in terms of throughput and locality.
 
 \section{Reference counting}
 \section{Mark-and-sweep}
-\begin{figure}
+\begin{figure}[b]
   \centering
   \includesvg[width=0.8\linewidth,inkscapelatex=false]{images/D9.svg}
   \caption{Mark-and-Sweep.}
@@ -525,6 +525,8 @@ pointer has been eliminated.
 some allocation patterns are faster, some are slower, metrics measured internally
 (gc time, mut time, collections, allocated, copied), rest measured
 by 'perf', each program was run 5 times.}
+
+
 
 \section{Verification}
 
