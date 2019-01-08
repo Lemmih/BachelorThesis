@@ -1,43 +1,10 @@
-\begin{table}
-  \hspace*{-1cm}\begin{minipage}{0.5\linewidth}
-    \centering
-    \caption{"BinTree" distances}
-    \resizebox{!}{2cm}{\begin{tabular}{|l|c|c|}
-      \hline
-      \multicolumn{3}{|c|}{Object distances:}\\
-      \hline
-      \textbf{Bucket}&\textbf{Baseline}&\textbf{Tail-copy}\\
-      <64 b        &523           &114053463\\
-      <4 kb        &26349         &6616\\
-      <64 kb       &423445        &211347\\
-      <512 kb      &2810463       &1564876\\
-      <2 mb        &7874711       &4414888\\
-      >2 mb        &216971852     &107856153\\
-      \hline
-    \end{tabular}}
-  \end{minipage}%
-  \hspace*{2cm}\begin{minipage}{0.5\linewidth}
-    \centering
-    \caption{"Allocate" distances}
-    \resizebox{!}{2cm}{\begin{tabular}{|l|c|c|}
-      \hline
-      \multicolumn{3}{|c|}{Object distances:}\\
-      \hline
-      \textbf{Bucket}&\textbf{Baseline}&\textbf{Tail-copy}\\
-      <64 b        &79930413           &79930435           \\
-      <4 kb        &3378         &3360           \\
-      <64 kb       &51200        &51200           \\
-      <512 kb      &361736       &361736           \\
-      <2 mb        &1029416       &1029408           \\
-      >2 mb        &78484699     &78484703           \\
-      \hline
-    \end{tabular}}
-  \end{minipage}
-\end{table}
 
 
 
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Mutator and GC tables
 
 \begin{table}
   \begin{ltable}{Mutator time}{muttable}
@@ -85,53 +52,6 @@ PowerSet       &12.6s          &-31.1\%        &-34.5\%        \\
 \end{table}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Heap size and allocations tables
-
-\begin{table}
-  \begin{ltable}{Heap size}{coltable}
-    \data{
-    \hline
-\multicolumn{4}{|c|}{Heap size:}\\
-\hline
-\textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
-Allocate       &1.3 gb         &+0.0\%         &+0.0\%         \\
-BinTree        &1.5 gb         &+0.0\%         &+0.0\%         \\
-Bush           &1.0 gb         &+0.0\%         &+0.0\%         \\
-BushTail       &1.6 gb         &+0.0\%         &+0.0\%         \\
-Imbalanced     &1.3 gb         &+0.0\%         &+0.0\%         \\
-MemBench       &1.4 gb         &+0.0\%         &+0.0\%         \\
-PowerSet       &1.5 gb         &+0.0\%         &+0.0\%         \\
-\hline
-\hline
-\multicolumn{2}{|l|}{Min}&0.0\%&0.0\%\\
-\multicolumn{2}{|l|}{Max}&0.0\%&0.0\%\\
-\multicolumn{2}{|l|}{Mean}&0.0\%&0.0\%\\
-\hline
-    }
-  \end{ltable}
-  \begin{rtable}{Allocations}{alloctable}
-    \data{
-    \hline
-\multicolumn{4}{|c|}{Allocated:}\\
-\hline
-\textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
-Allocate       &4.0 gb         &+0.0\%         &+0.0\%         \\
-BinTree        &9.8 gb         &+0.0\%         &+0.0\%         \\
-Bush           &6.6 gb         &+0.0\%         &+0.0\%         \\
-BushTail       &5.2 gb         &+0.0\%         &+0.0\%         \\
-Imbalanced     &7.8 gb         &+0.0\%         &+0.0\%         \\
-MemBench       &9.7 gb         &+0.0\%         &+0.0\%         \\
-PowerSet       &15.1 gb        &+0.0\%         &+0.0\%         \\
-\hline
-\hline
-\multicolumn{2}{|l|}{Min}&0.0\%&0.0\%\\
-\multicolumn{2}{|l|}{Max}&0.0\%&0.0\%\\
-\multicolumn{2}{|l|}{Mean}&0.0\%&0.0\%\\
-\hline
-    }
-  \end{rtable}
-\end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Copied and page-faults

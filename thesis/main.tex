@@ -243,6 +243,7 @@ details of tail-pointer elimination.}
 \chapter{Tail-copying and tail-compaction}
 
 \section{Concept overview}
+\label{concept_overview}
 
 \makecomment{Diagrams for this section: Copy order and cache lines (depth-first,
 breadth-first, tail-first), tail pointer elimination.}
@@ -521,84 +522,152 @@ pointer has been eliminated.
 \chapter{Evaluation}
 
 \section{Methodology}
-\makecomment{Keywords: 7 test programs with different allocation patterns, 12 measured metrics,
-some allocation patterns are faster, some are slower, metrics measured internally
-(gc time, mut time, collections, allocated, copied), rest measured
-by 'perf', each program was run 5 times.}
+The effects of tail-copying and tail-compaction are measured over 7 small
+benchmark programs with metrics collected in three different ways.
+GC statistics (heap size, allocations, bytes copied) are reported by the LHC RTS,
+and, since these metrics do not change between runs, the benchmark suite is only
+executed once to collect this data.
+How the runtime is split between the mutator and the garbage collector is
+measured using a high-precision clock with a resolution of 1ns. These runtime
+measurements are inherently stochastic and the benchmark suite is executed
+fives and only the median values are used.
+Hardware performance counter statistics are collected using the Linux \emph{perf}
+tool.\cite{perf} This tool is used to collect the number of page faults, cycles, instructions,
+branches, branch misses, LLC (last-level cache) loads and LLC load misses. Again,
+these measurements are stochastic and the benchmark suite is executed five times
+and the median values are used.
 
-
+The \emph{perf} tool supports other counters but this subset was chosen since
+each of these counters should something relevant to the performance of the two
+novel algorithms. Page faults (in this benchmark suite) are triggered when newly
+allocated memory is used for the first time. They find an unused page of physical
+memory and make sure its filled with zeros. This can be quite time consuming
+and much research has gone into reducing the number of page faults.\cite{Nakashima:1995,Chase:1987,Moon:1984,Grunwald:1993}
+The number of cycles is related to the number of instructions but seemingly
+innocent algorithmic changes can have unintuitive effects. With the right
+scheduling, multiple instructions can be executed in parallel and latency from
+the memory systems can be hidden (eg. by prefetching data). Getting this scheduling
+wrong will make the cycle count go up even when the number of executed instructions
+stays the same. Branches and particularly branch-misses are another factor in
+how efficiently a CPU can execute instructions. A branch mispredict flushes the
+instruction pipeline, which are quite deep in modern architectures, wasting
+10-20 cycles.\cite{Drepper}
 
 \section{Verification}
 
-\makecomment{Histogram and "copied" metric indicate that the implementations
-are correct.}
+\begin{table}
+  \hspace*{-1cm}\begin{minipage}{0.5\linewidth}
+    \centering
+    \caption{"BinTree" pointer distances}
+    \label{bintree_dist}
+    \resizebox{!}{2cm}{\begin{tabular}{|l|c|c|}
+      \hline
+      \multicolumn{3}{|c|}{Object distances:}\\
+      \hline
+      \textbf{Bucket}&\textbf{Baseline}&\textbf{Tail-copy}\\
+      <64 b        &523           &114053463\\
+      <4 kb        &26349         &6616\\
+      <64 kb       &423445        &211347\\
+      <512 kb      &2810463       &1564876\\
+      <2 mb        &7874711       &4414888\\
+      >2 mb        &216971852     &107856153\\
+      \hline
+    \end{tabular}}
+  \end{minipage}%
+  \hspace*{2cm}\begin{minipage}{0.5\linewidth}
+    \centering
+    \caption{"Allocate" pointer distances}
+    \label{allocate_dist}
+    \resizebox{!}{2cm}{\begin{tabular}{|l|c|c|}
+      \hline
+      \multicolumn{3}{|c|}{Object distances:}\\
+      \hline
+      \textbf{Bucket}&\textbf{Baseline}&\textbf{Tail-copy}\\
+      <64 b        &79930413     &79930435       \\
+      <4 kb        &3378         &3360           \\
+      <64 kb       &51200        &51200          \\
+      <512 kb      &361736       &361736         \\
+      <2 mb        &1029416      &1029408        \\
+      >2 mb        &78484699     &78484703       \\
+      \hline
+    \end{tabular}}
+  \end{minipage}
+\end{table}
 
-\section{Results and interpretation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Mutator and GC tables
+%% Heap size and allocations tables
+
+\begin{table}[b]
+  \begin{ltable}{Heap size}{heaptable}
+    \data{
+    \hline
+\multicolumn{4}{|c|}{Heap size:}\\
+\hline
+\textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
+Allocate       &1.3 gb         &+0.0\%         &+0.0\%         \\
+BinTree        &1.5 gb         &+0.0\%         &+0.0\%         \\
+Bush           &1.0 gb         &+0.0\%         &+0.0\%         \\
+BushTail       &1.6 gb         &+0.0\%         &+0.0\%         \\
+Imbalanced     &1.3 gb         &+0.0\%         &+0.0\%         \\
+MemBench       &1.4 gb         &+0.0\%         &+0.0\%         \\
+PowerSet       &1.5 gb         &+0.0\%         &+0.0\%         \\
+\hline
+\hline
+\multicolumn{2}{|l|}{Min}&0.0\%&0.0\%\\
+\multicolumn{2}{|l|}{Max}&0.0\%&0.0\%\\
+\multicolumn{2}{|l|}{Mean}&0.0\%&0.0\%\\
+\hline
+    }
+  \end{ltable}
+  \begin{rtable}{Allocations}{alloctable}
+    \data{
+    \hline
+\multicolumn{4}{|c|}{Allocated:}\\
+\hline
+\textbf{Name}&\textbf{Baseline}&\textbf{Tail-copy}&\textbf{Tail-compact}\\
+Allocate       &4.0 gb         &+0.0\%         &+0.0\%         \\
+BinTree        &9.8 gb         &+0.0\%         &+0.0\%         \\
+Bush           &6.6 gb         &+0.0\%         &+0.0\%         \\
+BushTail       &5.2 gb         &+0.0\%         &+0.0\%         \\
+Imbalanced     &7.8 gb         &+0.0\%         &+0.0\%         \\
+MemBench       &9.7 gb         &+0.0\%         &+0.0\%         \\
+PowerSet       &15.1 gb        &+0.0\%         &+0.0\%         \\
+\hline
+\hline
+\multicolumn{2}{|l|}{Min}&0.0\%&0.0\%\\
+\multicolumn{2}{|l|}{Max}&0.0\%&0.0\%\\
+\multicolumn{2}{|l|}{Mean}&0.0\%&0.0\%\\
+\hline
+    }
+  \end{rtable}
+\end{table}
+
+
+The seven benchmark program used all have heap sizes measured in gigabytes,
+making it nigh impossible to visually inspect for verification. Fortunately
+there's a lot of aggregate data which can give us an indication of whether
+tail-copying and tail-compaction works as theorised in section \ref{concept_overview}.
+
+Table \ref{bintree_dist} and \ref{allocate_dist} show the pointer distances
+between parent and child objects, grouped into 6 buckets. Siegwart et al uses
+this metric of pointer distances to quantify the improvements of their
+garbage collection algorithm.\cite{Siegwart:2006} Since the purpose of the tail-copying algorithm
+is to put children right next to their parent, the number of pointers that refer
+to objects within 64 bytes should increase dramatically and this is exactly what
+is seen for the \emph{BinTree} benchmark. The \emph{Allocate} benchmark, however,
+does not exhibit this pattern. This is due to the way the program manipulates
+a single list: For lists, there's no significant difference between breadth-first
+copying, depth-first copying or tail-first copying. The \emph{Allocate} benchmark
+is an outlier, though, and none of the other programs behave like this (as
+shown by the pointer distances in appendix \ref{pointer_distances}).
+
+Furthermore, as shown by table \ref{heaptable} and \ref{alloctable},
+\section{Results and interpretation}
 
 \input{thesis/data}
 
 \chapter{Conclusion}
 
-% \chapter{Structure}
-% \begin{enumerate}
-%   \item Context (20\%): Motivate the problem (introduction, why should the reader care,
-%     what have other people done)
-%   \item Gap (10\%): Give the problem definition and what is missing from the current solutions
-%   \item Innovation (50\%): Give the key-idea/detailed methods/experiemnts and evaluation (in that order)
-%   \item (20\%) Talk about shortcomings of your approach, and future work, i.e. the conclusion.
-% \end{enumerate}
-%
-% Context:
-% \begin{enumerate}
-%   \item Sequential access is faster (due to cache)
-%   \item Breadth-first GC leads to non-sequential access
-%   \item People have tried to solve it with hierarchical copying
-%   \item Sequential data allows for pointers to be omitted
-% \end{enumerate}
-%
-% Gap:
-% \begin{enumerate}
-%   \item Copying GC
-%   \item Cheney's algorithm (zero stack, breadth-first ordering)
-%   \item Depth-first ordering
-%   \item Hierarchical ordering
-% \end{enumerate}
-%
-% Innovation:
-% \begin{enumerate}
-%   \item Mixed depth-first/breadth-first ordering
-%   \item Histogram of distances from parent to children.
-%   \item Tail-pointer elimination
-% \end{enumerate}
-%
-%
-% \chapter{Introduction}
-% Context (20\%): Motivate the problem (introduction, why should the reader care,
-% what have other people done)
-%
-% Motivate the problem: CPUs have gotten a lot faster than memory and caches have been
-% the answer, many modern languages use GC and copying can lead to better locality, locality is
-% important, copying GC can have better locality than mark-and-sweep,
-% describe cheney's algorithm, cheney not cache friendly because breadth-first,
-% some tried to solve it by doing depth-first, other's by hierarchical order, immix
-% (mixing copying and mark-sweep)
-% Changing data layouts can lead to big performance improvements (50\% fewer misses, 20\%
-% increased throughput)
-%
-% {section} cheney's algorithm is widely used but not very cache friendly.
-%
-% What does that reader need to know? GC, Semi-space GC, mark-and-sweep, cache
-% behavior.
-%
-% Why should the reader care? Cheney algorithm is not cache friendly. Cache friendly
-% access can be much faster.
-%
-% What have other people done? Depth-first copying, hierarchical copying, immix.
-%
-% \chapter{Gap}
-% Give the problem definition and what is missing from the current solutions
 
 \chapter*{Support}
 
@@ -754,13 +823,13 @@ input data, and scales better. \cite{Eiron:1999}}
 does the importance of e ective utilization of the memory hierarchy.}
 \cite{Eiron:1999}
 
-\blockquote{Temporal garbage collection (TGC) is based on two heu-ristics:
+\blockquote{Temporal garbage collection (TGC) is based on two heuristics:
 • Young objects tend lo become garbage quickly.
 • The number of pointers from old objects to young objects is relatively small.}
 \cite{Courts:1988}
 
 \blockquote{Our measurements show that poor locality in sequential-fit
-allocation algorithms reduces program per-formance, both by increasing paging
+allocation algorithms reduces program performance, both by increasing paging
 and cache miss rates. While increased paging can be debilitating on any
 architecture, cache misses rates are also important for modern computer
 architectures. \cite{Grunwald:1993}}
@@ -781,6 +850,7 @@ What every programmer should know about memory \cite{Drepper}
 \bibliography{sources}
 
 \appendix
+\lstset{language=c}
 
 \chapter{Scavenging routine.}
 \label{scavenge_code}
@@ -824,7 +894,6 @@ static void scavenge(void) {
 \chapter{loadLast routine.}
 \label{loadLast_code}
 
-\lstset{language=c}
 \begin{lstlisting}
 word* _lhc_loadLast(word *ptr, word idx) {
   if(_lhc_getTail(*ptr)) {
@@ -834,6 +903,99 @@ word* _lhc_loadLast(word *ptr, word idx) {
   }
 }
 \end{lstlisting}
+
+\chapter{Pointer distances}
+\label{pointer_distances}
+
+\begin{table}[t]
+  \hspace*{-1cm}\begin{minipage}{0.5\linewidth}
+    \centering
+    \caption{"Bush" pointer distances}
+    \resizebox{!}{2cm}{\begin{tabular}{|l|c|c|}
+      \hline
+      \multicolumn{3}{|c|}{Object distances:}\\
+      \hline
+      \textbf{Bucket}&\textbf{Baseline}&\textbf{Tail-copy}\\
+      <64 b        &122           &41819119\\
+      <4 kb        &13250         &4232\\
+      <64 kb       &163606        &110942\\
+      <512 kb      &1221204       &1067398\\
+      <2 mb        &3568091       &3461401\\
+      >2 mb        &162307510     &120810691\\
+      \hline
+    \end{tabular}}
+  \end{minipage}%
+  \hspace*{2cm}\begin{minipage}{0.5\linewidth}
+    \centering
+    \caption{"BushTail" pointer distances}
+    \resizebox{!}{2cm}{\begin{tabular}{|l|c|c|}
+      \hline
+      \multicolumn{3}{|c|}{Object distances:}\\
+      \hline
+      \textbf{Bucket}&\textbf{Baseline}&\textbf{Tail-copy}\\
+      <64 b        &63486839           &83491247           \\
+      <4 kb        &4266         &865           \\
+      <64 kb       &53303        &38177           \\
+      <512 kb      &418026       &402746           \\
+      <2 mb        &1231390       &1428856           \\
+      >2 mb        &78308537     &58140470           \\
+      \hline
+    \end{tabular}}
+  \end{minipage}
+\end{table}%
+\begin{table}
+  \hspace*{-1cm}\begin{minipage}{0.5\linewidth}
+    \centering
+    \caption{"Imbalanced" pointer distances}
+    \resizebox{!}{2cm}{\begin{tabular}{|l|c|c|}
+      \hline
+      \multicolumn{3}{|c|}{Object distances:}\\
+      \hline
+      \textbf{Bucket}&\textbf{Baseline}&\textbf{Tail-copy}\\
+      <64 b        &440           &88991152\\
+      <4 kb        &31107         &2089\\
+      <64 kb       &507161        &72776\\
+      <512 kb      &3428454       &721718\\
+      <2 mb        &8952659       &2434901\\
+      >2 mb        &165061074     &85758259\\
+      \hline
+    \end{tabular}}
+  \end{minipage}%
+  \hspace*{2cm}\begin{minipage}{0.5\linewidth}
+    \centering
+    \caption{"MemBench" pointer distances}
+    \resizebox{!}{2cm}{\begin{tabular}{|l|c|c|}
+      \hline
+      \multicolumn{3}{|c|}{Object distances:}\\
+      \hline
+      \textbf{Bucket}&\textbf{Baseline}&\textbf{Tail-copy}\\
+      <64 b        &29959     &132133061           \\
+      <4 kb        &2860192         &71           \\
+      <64 kb       &56830312        &13479           \\
+      <512 kb      &204545590       &83117           \\
+      <2 mb        &0      &177361           \\
+      >2 mb        &0     &131858964           \\
+      \hline
+    \end{tabular}}
+  \end{minipage}
+\end{table}%
+\begin{table}
+    \centering
+    \caption{"PowerSet" pointer distances}
+    \resizebox{!}{2cm}{\begin{tabular}{|l|c|c|}
+      \hline
+      \multicolumn{3}{|c|}{Object distances:}\\
+      \hline
+      \textbf{Bucket}&\textbf{Baseline}&\textbf{Tail-copy}\\
+      <64 b        &500068           &204577727\\
+      <4 kb        &4133952         &0\\
+      <64 kb       &99486789        &0\\
+      <512 kb      &305010962       &47458\\
+      <2 mb        &8       &190440\\
+      >2 mb        &23602     &204339756\\
+      \hline
+    \end{tabular}}
+\end{table}
 
 % \chapter{Tikz}
 % Tikz trial:
