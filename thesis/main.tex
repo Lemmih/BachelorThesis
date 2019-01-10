@@ -44,7 +44,7 @@ memory caches. As part of this work I want to answer the following questions:
 \begin{itemize}
   \item Is the implementation unreasonably complicated? Some previously proposed
     systems have shown promise on a small scale but were too complicated to be
-    used outside of academia.
+    used outside of academia.\cite{GHCImmix}
   \item Are the optimizations beneficial and do the benefits outweigh the costs?
   \item Can the optimizations be ported to collectors used in industry?
 \end{itemize}
@@ -566,6 +566,11 @@ how efficiently a CPU can execute instructions. A branch mispredict flushes the
 instruction pipeline, which are quite deep in modern architectures, wasting
 10-20 cycles.\cite{Drepper}
 
+All measurements were gathered on an Intel i7-8705 3.1GHz running Linux 4.18 64bit.
+
+Finally, for the reasons stated in section \ref{concept_overview}, tail-compaction
+depends on tail-copying and automatically enables it.
+
 \section{Verification}
 
 \begin{table}
@@ -660,7 +665,7 @@ PowerSet       &15.1 gb        &+0.0\%         &+0.0\%         \\
 The seven benchmark program used all have heap sizes measured in gigabytes,
 making it nigh impossible to visually inspect for verification. Fortunately
 there's a lot of aggregate data which can give us an indication of whether
-tail-copying and tail-compaction works as theorised in section \ref{concept_overview}.
+tail-copying and tail-compaction works as theorized in section \ref{concept_overview}.
 
 Table \ref{bintree_dist} and \ref{allocate_dist} show the pointer distances
 between parent and child objects, grouped into 6 buckets. Siegwart et al uses
@@ -682,13 +687,70 @@ Looking at table \ref{copiedtable}, it can be seen that the number of bytes copi
 during garbage collection when tail-compaction is enabled, always drops by a
 fraction: -\nicefrac{1}{3} or -33.3\%, -\nicefrac{1}{4} or -25\%,
 -\nicefrac{1}{5} or -20\%, -\nicefrac{1}{8} or -12.5\%. This is because each
-benchmark problem mainly uses a single data structure. If the size of this data
-structure is, say, 4 words, eliminating the one-word pointer would yield a saving
-of \nicefrac{1}{4}.
+benchmark problem mainly uses a single data structure of fixed size. If the size
+of this data structure is, say, 4 words, eliminating the one-word pointer would
+yield a saving of \nicefrac{1}{4}. Finally, table \ref{heaptable} shows a modest
+reduction in heap size when tail-compaction is enabled, just as predicted earlier.
+These results indicate that the garbage collection strategies work as theorized.
 
-\section{Results and interpretation}
+\section{Performance interpretation}
 
 \input{thesis/data}
+
+Tail-copying does not change the code of the mutator but changing the layout of
+the data may very well still affect the performance. Table \ref{muttable} shows
+that both tail-copying and tail-compaction tends to improve the performance
+of the mutator ever so slightly. This effect is so tiny as to be insignificant,
+though, and the key insight to glean is that neither strategy hurts the performance
+of the mutator.
+
+GC times, as seen in table \ref{gctable}, reveils a more complicated landscape:
+for both tail-copying and tail-compaction, three benchmarks become faster and
+four benchmarks become slower. It is important to note, however, that all seven
+benchmarks are improved by tail-compaction compared to just tail-copying.
+Understanding the performance of tail-copying and tail-compaction requires a
+deeper dig into the performance counters.
+
+Table \ref{pagetable} shows that enable tail-compaction reduces page faults
+across the board and the drop corresponds almost exactly to the reduced heap
+size. This, together with LLC loads which are also reduced across the board,
+appears to be why tail-compaction improves the performance of every single
+benchmark program (relative to tail-copying) even though the total number of
+branches go up (table \ref{branchtable}).
+
+The reason \emph{Allocate}, \emph{BinTree}, \emph{Bush} and \emph{BushTail}
+perform so poorly appears to be due to CPU stalls: Number of cycles go up
+while number of instructions go down (as shown in tables \ref{cycletable} and
+\ref{insttable}). In the cases of \emph{BinTree}, \emph{Bush} and
+\emph{BushTail}, this appears to be primarily caused by a large increase in
+branch misses, ranging from +44.4\% to +107.5\% (see table \ref{branchmisstable}),
+and partly due to a small increase in LLC load misses in the case of \emph{Bush}
+(see table \ref{llcmisstable}). \emph{Allocate} follows a different pattern
+with a reduction in both branch misses and LLC loads but a sizable increase in
+LLC load misses, leading to a poor instructions-per-cycle count (see table
+\ref{llctable}).
+
+Only four of the benchmark programs (\emph{BinTree}, \emph{Imbalanced},
+\emph{MemBench} and \emph{PowerSet}) exhibit the reduction in LLC load misses
+that tail-copying and tail-compaction aims for. Furthermore, the benefits of
+the reduction in LLC load misses is impeded by the extra cost of branch misses
+in the case of \emph{Imbalanced}. For \emph{BinTree} the situation is even worse
+and the benefits are dwarfed by the extra costs. All in all, the two new
+garbage collection strategies succeed in arranging the heap in a more
+cache-frindly manner but the gains are eaten by unpredictable branches.
+
+\section{Possible improvements}
+
+
+
+\section{Code complexity}
+
+The implementation of tail-copying takes up only 15 lines out of the 224 lines
+that define the full semispace garbage collector in LHC. The implementation of
+tail-compaction only takes up 10 lines in the RTS but leans heavily on the
+garbage collection API in LHC which clocks in at 230 lines of Haskell code. All
+in all, both the tail-copying and tail-compaction algorithms fit in well in
+the semispace garbage collector and do not impose excessive complexity.
 
 \chapter{Conclusion}
 

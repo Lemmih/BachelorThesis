@@ -6,7 +6,7 @@ in the future. However, memory bandwidth hasn't improved at the same pace as pri
 and latency has even gone up. This has lead to the development of memory caches
 closer to the CPU but traditional garbage collection algorithms do not make good
 use of these. This report explores two new techniques, named tail-copying and
-tail-elimination, that extend Cheney's
+tail-compaction, that extend Cheney's
 semi-space garbage collection algorithm to improve cache friendliness and therefore
 performance. Measurements of 7 benchmark programs shows that the two techniques
 are able to reduce the number of cache misses but the performance benefits are
