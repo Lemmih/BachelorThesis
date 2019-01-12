@@ -741,7 +741,28 @@ cache-frindly manner but the gains are eaten by unpredictable branches.
 
 \section{Possible improvements}
 
+Using the heap size saving to increase the allocation area would be the easiest
+way of improving the performance of the tail-compaction strategy. A larger
+allocation area means fewer objects survive between each collection and the
+garbage collector therefore has less work to do and fewer objects to copy. Given
+that the heap savings can be quite significant (8.3\% in the case of
+\emph{Allocate}), this might very well push the tail-compaction strategy from
+being a slight performance loss to being a slight performance gain.
 
+It may also be possible to reduce the number of branch misses. The \emph{perf}
+tool identifies the 'evacuate' procedure as the culprit due to the radically
+different behavior that depends on whether a node can be compacted or not.
+Predicting this is difficult for the CPU but there \emph{are} patterns that can
+could be exploited. For example, compacted nodes usually appear in chains so
+if the algorithms find one compacted node then the next one is likely to also
+be compacted. Furthermore, only tail pointers are candidates for compaction.
+These two facts could be exploited by having two separate 'evacuate' procedures,
+one which assumes a node will be compacted and one which assumes it will not.
+
+A third possible improvement would be to identify which data structures benefit
+the most from tail-copying and tail-compaction. It tentatively appears that
+lists and binary trees benefit more than bushy data types but I have no
+empirical evidence for this.
 
 \section{Code complexity}
 
@@ -754,6 +775,16 @@ the semispace garbage collector and do not impose excessive complexity.
 
 \chapter{Conclusion}
 
+The aim of the thesis was to shed light on whether tail-copying and
+tail-compaction could be added to a semi-space garbage collector with a
+reasonable amount of effort, whether doing so would lead to any performance
+agains, and 
+
+\item Is the implementation unreasonably complicated? Some previously proposed
+  systems have shown promise on a small scale but were too complicated to be
+  used outside of academia.\cite{GHCImmix}
+\item Are the optimizations beneficial and do the benefits outweigh the costs?
+\item Can the optimizations be ported to collectors used in industry?
 
 \chapter*{Support}
 
