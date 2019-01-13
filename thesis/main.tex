@@ -214,13 +214,13 @@ collected languages.
 \makecomment{Haskell is a purely functional language.\cite{HaskellReport} Mutable objects are
 uncommon which leads to a high allocate rate (ie. in Haskell, you create new
 objects instead of mutating old ones. How many Haskellers does it take to
-change a broken lightbulb? Zero. The lightbulb is immutable. You just create
-a new house with a working lightbulb.)}
+change a broken light bulb? Zero. The light bulb is immutable. You just create
+a new house with a working light bulb.)}
 
 \section{GHC}
 \makecomment{Diagrams for this section: GHC's memory model, GHC's pipeline.}
 
-\makecomment{GHC's object model is assumes an open-world and is extendible.
+\makecomment{GHC's object model is assumes an open-world and is extendable.
 Objects as pointers has drawbacks, though, and GHC has abandoned the tag-less
 model. However, they can only use 2-3 bits (on 32bit and 64bit machines,
 respectively) so their tagging is limited. LHC assumes a closed world and therefore
@@ -451,7 +451,7 @@ heaps.
 
 The elimination of tail pointers is straight forward in the common case but there
 are two situations that add complexity: Firstly, objects are always mutated by
-replacing them with an indirection to a new object. In contrast to inplace updates,
+replacing them with an indirection to a new object. In contrast to in-place updates,
 this approach allows small objects to be replaced by larger objects and the update
 happens atomically. The indirections are removed during garbage collection
 and should not inhibit tail-pointer elimination as long as all other requirements
@@ -518,7 +518,7 @@ leads to four new cases that needs to be handled in the 'evacuate' procedure:
 
 Since the new 'evacuate' procedure guarantees that tail pointers always point
 to \emph{to-space}, the scavenging procedure can be optimized to omit the
-call to 'evacuate' on the tail pointer. The full code of the scavening procedure
+call to 'evacuate' on the tail pointer. The full code of the scavenging procedure
 is shown in appendix \ref{scavenge_code}.
 
 To complete the implementation of tail-pointer elimination, the rest of the
@@ -704,7 +704,7 @@ of the mutator ever so slightly. This effect is so tiny as to be insignificant,
 though, and the key insight to glean is that neither strategy hurts the performance
 of the mutator.
 
-GC times, as seen in table \ref{gctable}, reveils a more complicated landscape:
+GC times, as seen in table \ref{gctable}, reveals a more complicated landscape:
 for both tail-copying and tail-compaction, three benchmarks become faster and
 four benchmarks become slower. It is important to note, however, that all seven
 benchmarks are improved by tail-compaction compared to just tail-copying.
@@ -737,7 +737,7 @@ the reduction in LLC load misses is impeded by the extra cost of branch misses
 in the case of \emph{Imbalanced}. For \emph{BinTree} the situation is even worse
 and the benefits are dwarfed by the extra costs. All in all, the two new
 garbage collection strategies succeed in arranging the heap in a more
-cache-frindly manner but the gains are eaten by unpredictable branches.
+cache-friendly manner but the gains are eaten by unpredictable branches.
 
 \section{Possible improvements}
 
@@ -833,7 +833,7 @@ and may run slowly because of excessive page faulting.}
 \cite{Chase:1987}
 
 \blockquote{The goal of hierarchical copying is to reduce cache and TLB misses
-by colocating objects on the same cache line or page. [...] Paralle hierarchical
+by co-locating objects on the same cache line or page. [...] Paralle hierarchical
 copying reduce mutator misses on all measured levels of the memory subsystem:
 L1 data cache, combined L2 cache, and TLB.\cite{Siegwart:2006}}
 
