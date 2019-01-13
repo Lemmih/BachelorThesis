@@ -767,24 +767,39 @@ empirical evidence for this.
 \section{Code complexity}
 
 The implementation of tail-copying takes up only 15 lines out of the 224 lines
-that define the full semispace garbage collector in LHC. The implementation of
+that define the full semi-space garbage collector in LHC. The implementation of
 tail-compaction only takes up 10 lines in the RTS but leans heavily on the
 garbage collection API in LHC which clocks in at 230 lines of Haskell code. All
 in all, both the tail-copying and tail-compaction algorithms fit in well in
-the semispace garbage collector and do not impose excessive complexity.
+the semi-space garbage collector and do not impose excessive complexity.
 
 \chapter{Conclusion}
 
 The aim of the thesis was to shed light on whether tail-copying and
 tail-compaction could be added to a semi-space garbage collector with a
 reasonable amount of effort, whether doing so would lead to any performance
-agains, and 
+gains, and whether the performance gains (if any) could reasonably be expected
+to translate over to a modern semi-space garbage collection outside of an
+academic setting. While the garbage collector implemented as a baseline in this
+report is as simple as can be and does not support features such as generations
+and in-place mutations (needed for mutable arrays, hash tables, etc.) which are
+an absolute must in production systems, such features are quite orthogonal to
+tail-copying/tail-compaction and should not complicate their implementation by
+much. In the LHC RTS, the new strategies take up about 10\% of the garbage
+collector and did not require any large structural changes to the baseline
+collector, making the effort to implement quite modest.
 
-\item Is the implementation unreasonably complicated? Some previously proposed
-  systems have shown promise on a small scale but were too complicated to be
-  used outside of academia.\cite{GHCImmix}
-\item Are the optimizations beneficial and do the benefits outweigh the costs?
-\item Can the optimizations be ported to collectors used in industry?
+Although tail-compaction did manage to reduce the number of LLC loads in nearly
+every benchmark program, this rarely translated into a tangible performance
+increase for a variety of reasons. And while increasing the heap size to match
+that of the baseline would definitely help performance, the numbers still
+represent a best-case scenario which is unlikely to be seen in non-academic
+settings. Commercial applications see much greater use of sharing, generational
+garbage collectors, mutable data structures, and non-uniform data structures, all
+of which make fewer nodes compactable and thus lowers the possible benefits of
+tail-compaction. All-in-all, it seems unlikely that tail-compaction will be
+useful in a commercial garbage collector until the branch prediction issue has
+been solved.
 
 \chapter*{Support}
 
