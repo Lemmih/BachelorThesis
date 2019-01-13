@@ -67,6 +67,7 @@ Chapter 5 concludes the work and presents possible future work.
   \centering
   \includesvg[width=0.5\linewidth,inkscapelatex=false]{images/D7.svg}
   \caption{Memory hierarchy.}
+  \label{hierarchy}
 \end{figure}
 
 CPUs used to run at similar frequencies as main memory, allowing them to read
@@ -78,21 +79,26 @@ manage the virtual memory using limited physical memory (which supports direct
 access with a constant latency) and a spinning disk drive (which requires seeking).
 
 In recent years CPUs have gotten a lot faster, the bandwidth of memory
-hasn't been able to keep pace and the memory latency has even gotten worse. This
+hasn't been able to keep pace and the memory latency has even gotten worse.\cite{Novark:2006,Chilimbi:1999,Reinhold:1994,Eiron:1999} This
 means that fetching data from memory can easily be the bottleneck when processing
 a data set. To solve this, several levels of memory caches were inserted closer
-to the CPU. These caches work in levels with the lowest levels being smallest
-and fastest. The caches have latencies that are roughly 100x to 10x quicker
-than main memory. The caches also have higher bandwidth than main memory but
+to the CPU. Figure \ref{hierarchy} illustrates this hierarchy. These caches work
+in levels with the lowest levels being smallest
+and fastest. Cache latency (ie. number of cycles it takes to fetch a word) can
+easily be two orders of magnitude lower than that of the main memory. Table
+\ref{latency} shows latency numbers from Ulrich Drepper's "What
+Every Programmer Should Know About Memory." \cite{Drepper}
+The caches also have higher bandwidth than main memory but
 the benefit is less extreme here.
 
 The introduction of caches meant that memory fetches no longer completed in a
 constant amount of time because of the difference between a cache hit and
 a cache miss. Just as seen with spinning disks earlier, certain access patterns
-and data layouts can significantly improve performance. The canonical problems
+and data layouts can significantly improve performance.\cite{Chilimbi:1999}
+The canonical problems
 that highlights this is matrix multiplication: The elements of the resulting
 matrix can be computed in any order but choosing a cache-friendly access pattern
-can be orders of magnitude faster.
+can be orders of magnitude faster.\cite{Chilimbi:1999,Eiron:1999}
 
 \begin{table}
   \centering
@@ -104,6 +110,7 @@ can be orders of magnitude faster.
     L2 & $\sim 14$ \\
     Main Memory & $\sim 240$
   \end{tabular}
+  \label{latency}
 \end{table}
 
 % Write about MESI and cache associativity
@@ -130,14 +137,24 @@ but performs less well in terms of throughput and locality.
 Unlike manual management and reference counting which never scans through all
 the heap allocated objects, tracing garbage collection involves finding all live
 heap objects by following a root set of objects out through all their children
-and children's children. Once all the live objects have been found, unused memory
+and children's children.\cite{Appel:1987} Once all the live objects have been found, unused memory
 and resources can be reclaimed.
 The mark-and-sweep does exactly this in two phases: First all objects reachable
 from the root set are marked, then the "sweep" phases reclaims unused memory and
-releases unused OS resources.
+releases unused OS resources. Unlike the "mark" phase, the time spent in the
+"sweep" phase is porportional to the total size of the heap, not just the number
+of live objects.\cite{Wilson:1992}
 This algorithm correctly reclaims cyclic data structures when they're no longer
 referenced but, similarly to manual management and reference counting, leads to
-fragmentation and thus poor cache performance.
+fragmentation and thus suboptimal cache performance.
+In his 1987 paper "Brief Survey of Garbage Collection Algorithms", David A. Chase states:
+\blockquote{In a computer with virtual memory both mark-and-sweep and
+reference-counting garbage collection tend to exhibit poor locality of reference
+and may run slowly because of excessive page faulting.}
+\cite{Chase:1987} As the cost of memory has gone down, swapping memory in and
+out (ie. page faulting) has become less common but the poor locality of reference
+hurts any caching scheme, be it in memory or on the CPU.\cite{Grunwald:1993}
+
 
 \section{Copying collectors}
 \begin{figure}
@@ -160,7 +177,7 @@ algorithm used stack space to traverse and copy the heap objects which is
 undesirable since the stack space is limited and garbage collection will therefore
 fail if the heap grows too large. One year later, Cheney published a non-recursive
 algorithm for copying live objects and this algorithm has become the foundation
-for essentially all modern copying garbage collectors. Since the algorithm is
+for essentially all modern copying garbage collectors.\cite{Cheney:1970} Since the algorithm is
 non-recursive, it uses no stack space and works on heaps at any size.
 
 Cheney's and Fenichel's algorithms both solve the same problem of copying a graph
@@ -173,7 +190,7 @@ investigated the effect copy order has with virtual memory. And it wasn't until
 1995 that the effects of copy order was quantified in relationship to the
 CPU memory cache hierarchy by Nakashima and Chikayama.
 
-Moon modified Cheney's algorithm to have two scanning pointers instead of one.
+Moon modified Cheney's algorithm to have two scanning pointers instead of one.\cite{Moon:1984}
 The to-space is divided up into blocks and the second scanning pointer always
 points at the same block as the free pointer. Since objects are read (scavenged)
 from the scanning pointer and children are copied (evacuated) to the free pointer,
@@ -183,29 +200,39 @@ Since this is optimizing for block/page access, it can perform better when memor
 is limited and page faults are expensive.
 
 Moon's algorithm was later improved by Wilson, Lam, and Moher to reduce the
-number of objects that are scavenged twice (scavenging is idempotent). Siegwart
-and Hirzel further improved performance by adapting the algorithm for
-multi-processor machines. Both groups of authors focused primarily on reducing
+number of objects that are scavenged twice (Moon's algorithm has to scavenge
+some objects more than once which is safe because scavenging is idempotent).
+\cite{Lam:1992}
+Siegwart and Hirzel further improved performance by adapting the algorithm for
+multi-processor machines.\cite{Siegwart:2006} Both groups of authors focused primarily on reducing
 cache and TLB misses.
 
 \section{Generational collectors}
-\makecomment{Diagrams for this section: generational gc.}
 
 It was found empirically that most allocated objects become unreachable (die)
 almost immediately and that very few objects live for a significant fraction
-of a programs total run-time. This effect of high infant mortality is exploited
+of a programs total run-time.\cite{Courts:1988,Appel:1989} This effect of high infant mortality is exploited
 by generational collectors by splitting the heap into two or more separate areas
 (aka generations) that can be collected independently. A common configuration is
 to have a minor and a major generation: New objects are allocated into the minor
 generation and promoted into the major generation if they survive a collection.
 Since it's relatively rare for older objects to contain pointers to younger
 objects, only a small amount of bookkeeping is necessary to collect the minor
-generation without tracing through all the live objects in the major generation.
+generation without tracing through all the live objects in the major generation.\cite{Appel:1989}
 In other words, infant objects can be allocated and collected without tracing or
 copying long lived objects. This approach has proved so successful that, even
 though the exact rate of infant mortality and object longevity varies from
 program to program, generational GC is the default in most popular garbage
 collected languages.
+
+Furthermore, in "Multicore Garbage Collection with Local Heaps", Marlow et al talks
+about an "allocation wall" where performance is capped by the rate new objects
+can be allocated in main memory.\cite{Marlow:2011} Hitting the "allocation wall" means your
+program will no longer run faster when given access to more cores. Marlow et al
+solves the problem by have a separate, cache-sized allocation area for each core.
+Objects allocated in these allocation areas may die and be garbage collected
+without ever leaving the CPU cache, freeing up main memory bandwidth for
+long-lived objects.
 
 \section{Region inference}
 
@@ -245,8 +272,13 @@ details of tail-pointer elimination.}
 \section{Concept overview}
 \label{concept_overview}
 
-\makecomment{Diagrams for this section: Copy order and cache lines (depth-first,
-breadth-first, tail-first), tail pointer elimination.}
+In his foundational "Garbage Collection in a Large LISP System", David A. Moon writes:
+\blockquote{A copying garbage collector is free to choose the order in which
+it copies accessible objects. It can exploit this freedom to improve locality by
+copying related objects onto the same page.}
+\cite{Moon:1984}
+It is this freedom that I want to use, not to copy related objects onto the same
+page but rather copy related objects onto the same cache-line when possible.
 
 While it has been shown that tracing garbage collectors that use a depth-first
 copying algorithm have superior data locality, this technique is not used in any
@@ -518,17 +550,16 @@ leads to four new cases that needs to be handled in the 'evacuate' procedure:
 
 Since the new 'evacuate' procedure guarantees that tail pointers always point
 to \emph{to-space}, the scavenging procedure can be optimized to omit the
-call to 'evacuate' on the tail pointer. The full code of the scavenging procedure
-is shown in appendix \ref{scavenge_code}.
+call to 'evacuate' on the tail pointer.
 
 To complete the implementation of tail-pointer elimination, the rest of the
 runtime-system has to be aware of how to find the address of a child by either
 following a pointer or computing it from the address of the parent. The LHC
 compiler tries to be agnostic towards the layout of objects and provides
 an API access point for finding the address of an object's last child. The full
-code is in appendix \ref{loadLast_code} and it simply either follows the pointer
-to the child of it exists or directly returns the address of the child if the
-pointer has been eliminated.
+code is tiny (see appendix \ref{loadLast_code}) and it simply either follows the
+pointer to the child of it exists or directly returns the address of the child
+if the pointer has been eliminated.
 
 
 
@@ -803,49 +834,50 @@ been solved.
 
 \chapter*{Support}
 
-\makecomment{The following quotes show how the references will be used to support
-the introduction, implementation decisions, and conclusion. This chapter will
-not appear in the final version of this report.}
+% Used
+% \blockquote{Recent process speed improvements have far outpaced memory speed
+% improvements.}\cite{Novark:2006}
 
-\blockquote{Recent process speed improvements have far outpaced memory speed
-improvements.}\cite{Novark:2006}
+% \blockquote{Past work has shown that careful placement of objects in memory can
+% yield performance improvements as high as 42\% in C and C++ applications.}
+% \cite{Novark:2006}
 
-\blockquote{Past work has shown that careful placement of objects in memory can
-yield performance improvements as high as 42\% in C and C++ applications.}
-\cite{Novark:2006}
+% Used
+% \blockquote{In general, software references locality can be improved either by
+% changing a program's data access pattern or its data organization and layout.}
+% \cite{Chilimbi:1999}
 
-\blockquote{In general, software references locality can be improved either by
-changing a program's data access pattern or its data organization and layout.}
-\cite{Chilimbi:1999}
-
-\blockquote{The speed of microprocessors has increased 60\% per year for almost
-two decades. Yet, over the same period, the time to access main memory only
-decreased at 10\% per year.}
-\cite{Chilimbi:1999}
+% Used
+% \blockquote{The speed of microprocessors has increased 60\% per year for almost
+% two decades. Yet, over the same period, the time to access main memory only
+% decreased at 10\% per year.}
+% \cite{Chilimbi:1999}
 
 \blockquote{Careful placement of structure elements provides the mechanism to
 improve the cache locality of pointer manipulating programs and, consequently,
 their performance.}
 \cite{Chilimbi:1999}
 
-\blockquote{As processor speeds continue to improve relative to main-memory
-access times, cache performance is becoming an increasingly important component
-of program performance.}
-\cite{Reinhold:1994}
+% Used
+% \blockquote{As processor speeds continue to improve relative to main-memory
+% access times, cache performance is becoming an increasingly important component
+% of program performance.}
+% \cite{Reinhold:1994}
 
-\blockquote{Processors are getting faster, by as factor of 1.5 to 2 per year,
-while the speed of main-memory chips is improving only slowly.}
-\cite{Reinhold:1994}
+% \blockquote{Processors are getting faster, by as factor of 1.5 to 2 per year,
+% while the speed of main-memory chips is improving only slowly.}
+% \cite{Reinhold:1994}
 
 \blockquote{In this paper, we propose two copying garbage collection methods.
 These two methods copy data structures in depth-first order, while conventional
 method copies in breadth-first order. This modification greatly improves memory
 access locality during both garbage collection and computation after.\cite{Nakashima:1995}}
 
-\blockquote{In a computer with virtual memory both mark-and-sweep and
-reference-counting garbage collection tend to exhibit poor locality of reference
-and may run slowly because of excessive page faulting.}
-\cite{Chase:1987}
+% Used
+% \blockquote{In a computer with virtual memory both mark-and-sweep and
+% reference-counting garbage collection tend to exhibit poor locality of reference
+% and may run slowly because of excessive page faulting.}
+% \cite{Chase:1987}
 
 \blockquote{The goal of hierarchical copying is to reduce cache and TLB misses
 by co-locating objects on the same cache line or page. [...] Paralle hierarchical
@@ -857,10 +889,11 @@ L1 data cache, combined L2 cache, and TLB.\cite{Siegwart:2006}}
 data structures copied by the garbage collector.}
 \cite{Moon:1984}
 
-\blockquote{A copying garbage collector is free to choose the order in which
-it copies accessible objects. It can explit this freedom to improve locality by
-copying related objects onto the same page.}
-\cite{Moon:1984}
+% Used
+% \blockquote{A copying garbage collector is free to choose the order in which
+% it copies accessible objects. It can explit this freedom to improve locality by
+% copying related objects onto the same page.}
+% \cite{Moon:1984}
 
 \blockquote{A copying garbage collector can choose breadth-first copying or
 depth-first copying. The Cheney list-copying algorithm, which is traditionally
@@ -888,26 +921,28 @@ collector - even if the cost of freeing a cell is only a single machine
 instruction.}
 \cite{Appel:1987}
 
-\blockquote{The traditional mark-and-sweep algorithm, which puts all free cells
-onto a linked list for later re-use, takes time proportional to the numebr of
-reachable cells plus the number of garbage cells.}
-\cite{Appel:1987}
+% Used
+% \blockquote{The traditional mark-and-sweep algorithm, which puts all free cells
+% onto a linked list for later re-use, takes time proportional to the number of
+% reachable cells plus the number of garbage cells.}
+% \cite{Appel:1987}
 
-\blockquote{Garbage-collected systems such as Smalltalk, Lisp, or actor languages typically violate some of the basic locality assumptions of modern memory hierarchies, leading to poor performance of normal caching strategies. The main problem is cyclic reuse of memory at a time scale too long to be captured by any caching policy. \cite{Lam:1992}}
+% \blockquote{Garbage-collected systems such as Smalltalk, Lisp, or actor languages typically violate some of the basic locality assumptions of modern memory hierarchies, leading to poor performance of normal caching strategies. The main problem is cyclic reuse of memory at a time scale too long to be captured by any caching policy. \cite{Lam:1992}}
 
 
-\blockquote{Given our understanding of the memory reuse cycle of a generational
-garbage collector, we believe it is attractive to exploit the genertional
-property by using a cache large enough to hold the youngest generation.]}
-\cite{Lam:1992}
+% \blockquote{Given our understanding of the memory reuse cycle of a generational
+% garbage collector, we believe it is attractive to exploit the genertional
+% property by using a cache large enough to hold the youngest generation.]}
+% \cite{Lam:1992}
 
-\blockquote{In a garbage collected environment, multithreaded programs can run
-into an "allocation wall", in which performance is limited by the rate at which
-newly allocated data can be written to main memory, and adding more cores does
-not improve performance once the limit is reached. One way to avoid the
-allocation wall is to use a generational collector with per-thread nurseries
-each smaller than the size of the L2 cache, so that most memory accesses hit the
-cache rather than main memory. \cite{Marlow:2011}}
+% Used
+% \blockquote{In a garbage collected environment, multithreaded programs can run
+% into an "allocation wall", in which performance is limited by the rate at which
+% newly allocated data can be written to main memory, and adding more cores does
+% not improve performance once the limit is reached. One way to avoid the
+% allocation wall is to use a generational collector with per-thread nurseries
+% each smaller than the size of the L2 cache, so that most memory accesses hit the
+% cache rather than main memory. \cite{Marlow:2011}}
 
 \blockquote{The effectiveness problem is that reference counting fails to reclaim
 circular structures. If the pointers in a group of objects create a cycle, the
@@ -920,55 +955,61 @@ generally proportional to the amount of work done by the running program, with a
 fairly large constant of proportionality.}
 \cite{Wilson:1992}
 
-\blockquote{There are three major problems with traditinal mark-sweep garbage
-collectors. First, it is difficult to handle objects of varying sizes without
-fragmentation of the available memory. [...] The second problem with mark-sweep
-collection is that the cost of a collection is proportional to the size of the
-heap, including both live and garbage objects. [...] The third problem involves
-locality of reference. Since objects are never moved, the live objects remain in
-place after a collection, interspersed with free space. \cite{Wilson:1992}}
+% Used
+% \blockquote{There are three major problems with traditinal mark-sweep garbage
+% collectors. First, it is difficult to handle objects of varying sizes without
+% fragmentation of the available memory. [...] The second problem with mark-sweep
+% collection is that the cost of a collection is proportional to the size of the
+% heap, including both live and garbage objects. [...] The third problem involves
+% locality of reference. Since objects are never moved, the live objects remain in
+% place after a collection, interspersed with free space. \cite{Wilson:1992}}
 
-\blockquote{The graph of records and pointers is mostly acyclic: newer records
-point to older records, and older records do not point to newer records.}
-\cite{Appel:1989}
+% Used
+% \blockquote{The graph of records and pointers is mostly acyclic: newer records
+% point to older records, and older records do not point to newer records.}
+% \cite{Appel:1989}
 
-\blockquote{A young object is more likely to become garbage soon. Most objects
-have short lifetimes, and only a few objects have long lifetimes. If something
-has lasted for a long time already, then it’s probably part of a semi-permanent
-data structure; if the object is relatively new, it’s likely to be a temporary
-structure holding an intermediate result. \cite{Appel:1989}}
+% Used
+% \blockquote{A young object is more likely to become garbage soon. Most objects
+% have short lifetimes, and only a few objects have long lifetimes. If something
+% has lasted for a long time already, then it’s probably part of a semi-permanent
+% data structure; if the object is relatively new, it’s likely to be a temporary
+% structure holding an intermediate result. \cite{Appel:1989}}
 
-\blockquote{Matrix multiplication is a classical bench-mark for experimenting
-with techniques used to exploit machine architecture and to overcome the
-limitations of contemporary memory subsystems.}
-\cite{Eiron:1999}
+% \blockquote{Matrix multiplication is a classical bench-mark for experimenting
+% with techniques used to exploit machine architecture and to overcome the
+% limitations of contemporary memory subsystems.}
+% \cite{Eiron:1999}
 
-\blockquote{This research aims at advancing the state of the art of algorithm
-engineering by balancing instruction level parallelism, two levels of data
-tiling, copying to provably avoid any cache conficts, and prefetching in
-parallel to algorithmic operations, in order to fully exploit the memory
-bandwidth. Measurements show that the resultant matrix multiplication algorithm
-outperforms IBM's ESSL by 6.8-31.8\%, is less sensitive to the size of the
-input data, and scales better. \cite{Eiron:1999}}
+% \blockquote{This research aims at advancing the state of the art of algorithm
+% engineering by balancing instruction level parallelism, two levels of data
+% tiling, copying to provably avoid any cache conficts, and prefetching in
+% parallel to algorithmic operations, in order to fully exploit the memory
+% bandwidth. Measurements show that the resultant matrix multiplication algorithm
+% outperforms IBM's ESSL by 6.8-31.8\%, is less sensitive to the size of the
+% input data, and scales better. \cite{Eiron:1999}}
 
-\blockquote{As the gap between CPU and memory performance continues to grow, so
-does the importance of e ective utilization of the memory hierarchy.}
-\cite{Eiron:1999}
+% Used
+% \blockquote{As the gap between CPU and memory performance continues to grow, so
+% does the importance of e ective utilization of the memory hierarchy.}
+% \cite{Eiron:1999}
 
-\blockquote{Temporal garbage collection (TGC) is based on two heuristics:
-• Young objects tend lo become garbage quickly.
-• The number of pointers from old objects to young objects is relatively small.}
-\cite{Courts:1988}
+% Used
+% \blockquote{Temporal garbage collection (TGC) is based on two heuristics:
+% • Young objects tend lo become garbage quickly.
+% • The number of pointers from old objects to young objects is relatively small.}
+% \cite{Courts:1988}
 
-\blockquote{Our measurements show that poor locality in sequential-fit
-allocation algorithms reduces program performance, both by increasing paging
-and cache miss rates. While increased paging can be debilitating on any
-architecture, cache misses rates are also important for modern computer
-architectures. \cite{Grunwald:1993}}
+% Used
+% \blockquote{Our measurements show that poor locality in sequential-fit
+% allocation algorithms reduces program performance, both by increasing paging
+% and cache miss rates. While increased paging can be debilitating on any
+% architecture, cache misses rates are also important for modern computer
+% architectures. \cite{Grunwald:1993}}
 
-\blockquote{The algorithm avoids the need for recursion by using the partial
-structure as it is built up to keep track of those lists that have been copied.}
-\cite{Cheney:1970}
+% \blockquote{The algorithm avoids the need for recursion by using the partial
+% structure as it is built up to keep track of those lists that have been copied.}
+% \cite{Cheney:1970}
 
 LLVM\cite{LLVM}
 
@@ -976,52 +1017,13 @@ LLVM GC support\cite{LLVMGC}
 
 GHC memory model \cite{GHCCommentary}
 
-What every programmer should know about memory \cite{Drepper}
+% What every programmer should know about memory \cite{Drepper}
 
 \bibliographystyle{unsrt}
 \bibliography{sources}
 
 \appendix
 \lstset{language=c}
-
-\chapter{Scavenging routine.}
-\label{scavenge_code}
-
-\begin{lstlisting}
-static void scavenge(void) {
-  const InfoTable *table;
-  // make a local copy of the global 'scavenged' pointer for
-  // better optimization opportunities.
-  word* s = scavenged;
-  // branch on _lhc_enable_tail_copying out side the loop to
-  // avoid unnecessary branches later.
-  if(_lhc_enable_tail_copying) {
-    while(s < free_space) {
-      word header = *s;
-      table = &_lhc_info_tables[_lhc_getTag(header)];
-      s += 1+table->nPrimitives;
-      // i=1 because we want to skip the last pointer. The
-      // pointer may not exist and if it does, it'll already
-      // have been evacuated.
-      for(int i=1;i<table->nHeapPointers;i++) {
-        evacuate(NULL, 0, (word**)s);
-        s++;
-      }
-      if(table->nHeapPointers && !_lhc_getTail(header)) s++;
-    }
-  } else {
-    while(s < free_space) {
-      table = &_lhc_info_tables[_lhc_getTag(*s)];
-      s += 1+table->nPrimitives;
-      for(int i=0;i<table->nHeapPointers;i++) {
-        evacuate(NULL, 0, (word**)s);
-        s++;
-      }
-    }
-  }
-  scavenged = s;
-}
-\end{lstlisting}
 
 \chapter{loadLast routine.}
 \label{loadLast_code}
