@@ -31,9 +31,23 @@ detailed measurements of their effects, are the primary contributions of this
 report.
 
 \section{Jikes RVM vs. GHC vs. native}
-\makecomment{Why I use a native GC rather than the Jikes RVM (Research Virtual Machine)
-to test my hypothesis even though a lot of other people use it.
-Answer: Haskell has different allocation patterns than Java*}
+
+Jikes Research Virtual Machine is an environment for running Java programs
+and it provides an excellent platform for experimenting with new garbage
+collection techniques, called MMTk (Memory Management Toolkit).\cite{Blackburn:2004}
+While Jikes RVM has been the starting point of a lot of solid research, I've
+decided not to use it because Haskell\cite{HaskellReport} (a purely functional language) has
+different allocation patterns than Java (an object-oriented language).
+\cite{Blackburn:2008,Hertz05garbagecollection,Hertz:2005,mc2}
+Objects in purely functional languages tend to be smaller and allocated at a
+faster rate than objects in object-oriented languages.
+
+Furthermore, I will not be using the mature Haskell compiler, GHC, since the
+complexity of its runtime-system (which spans more than 100k lines of code)
+makes it difficult to modify and reason about. Instead I will use the LHC
+compiler. It only supports a subset of the Haskell 2010 standard but its
+runtime-system is much smaller and more nimble. Key design choices of
+LHC (and how they differ from GHC's) are explained in chapter \ref{background}.
 
 \section{Research Aims}
 I have implemented a new semi-space garbage collector for a subset of the
@@ -61,6 +75,8 @@ evaluation looks at deterministic factors which are proxies for performance.
 Chapter 5 concludes the work and presents possible future work.
 
 \chapter{Background}
+\label{background}
+
 \section{Processors, memory and cache}
 
 \begin{figure}
@@ -127,11 +143,14 @@ Manual management often has more predictable performance without arbitrary pause
 but performs less well in terms of throughput and locality.
 
 \section{Reference counting}
+
+
 \section{Mark-and-sweep}
 \begin{figure}[b]
   \centering
   \includesvg[width=0.8\linewidth,inkscapelatex=false]{images/D9.svg}
   \caption{Mark-and-Sweep.}
+  \label{mark_and_sweep}
 \end{figure}
 
 Unlike manual management and reference counting which never scans through all
@@ -139,7 +158,7 @@ the heap allocated objects, tracing garbage collection involves finding all live
 heap objects by following a root set of objects out through all their children
 and children's children.\cite{Appel:1987} Once all the live objects have been found, unused memory
 and resources can be reclaimed.
-The mark-and-sweep does exactly this in two phases: First all objects reachable
+The mark-and-sweep does exactly this in two phases (illustrated in figure \ref{mark_and_sweep}): First all objects reachable
 from the root set are marked, then the "sweep" phases reclaims unused memory and
 releases unused OS resources. Unlike the "mark" phase, the time spent in the
 "sweep" phase is porportional to the total size of the heap, not just the number
@@ -153,7 +172,7 @@ reference-counting garbage collection tend to exhibit poor locality of reference
 and may run slowly because of excessive page faulting.}
 \cite{Chase:1987} As the cost of memory has gone down, swapping memory in and
 out (ie. page faulting) has become less common but the poor locality of reference
-hurts any caching scheme, be it in memory or on the CPU.\cite{Grunwald:1993}
+hurts any caching scheme, be it between memory and disk, or CPU and memory.\cite{Grunwald:1993}
 
 
 \section{Copying collectors}
@@ -161,11 +180,13 @@ hurts any caching scheme, be it in memory or on the CPU.\cite{Grunwald:1993}
   \centering
   \includesvg[height=2cm,inkscapelatex=false]{images/D8.svg}
   \caption{Cheney's semi-space algorithm.}
+  \label{cheney_algorithm}
 \end{figure}
 \begin{figure}[b]
   \centering
   \includesvg[height=2cm,inkscapelatex=false]{images/D10.svg}
   \caption{Moon's algorithm.}
+  \label{moon_algorithm}
 \end{figure}
 
 In 1969, Fenichel et al published an algorithm for copying the reachable objects
@@ -183,14 +204,18 @@ non-recursive, it uses no stack space and works on heaps at any size.
 Cheney's and Fenichel's algorithms both solve the same problem of copying a graph
 with Cheney's algorithm having the decisive advantage of working on graphs of
 unlimited size. However, the two algorithms also differ in the fact that Fenichel
-copied the graph in depth-first order and Cheney copies using breadth-first. This
-different copy order affects cache performance but the effects wasn't too pronounced
-with the architecture at the time and it wasn't unless 1984 that Moon et al
+copied the graph in depth-first order and Cheney copies using breadth-first.
+Figure \ref{cheney_algorithm} illustrates how objects in the "from-space"
+are evacuated (ie. copied) into "to-space" and later scavenged (ie. had their
+children evacuated).
+This
+different copy order affects cache performance but the effects weren't too pronounced
+with the architectures at the time and it wasn't until 1984 that Moon et al
 investigated the effect copy order has with virtual memory. And it wasn't until
 1995 that the effects of copy order was quantified in relationship to the
-CPU memory cache hierarchy by Nakashima and Chikayama.
+CPU memory cache hierarchy by Nakashima and Chikayama.\cite{Nakashima:1995}
 
-Moon modified Cheney's algorithm to have two scanning pointers instead of one.\cite{Moon:1984}
+As illustrated in figure \ref{moon_algorithm}, Moon modified Cheney's algorithm to have two scanning pointers instead of one.\cite{Moon:1984}
 The to-space is divided up into blocks and the second scanning pointer always
 points at the same block as the free pointer. Since objects are read (scavenged)
 from the scanning pointer and children are copied (evacuated) to the free pointer,
@@ -200,7 +225,7 @@ Since this is optimizing for block/page access, it can perform better when memor
 is limited and page faults are expensive.
 
 Moon's algorithm was later improved by Wilson, Lam, and Moher to reduce the
-number of objects that are scavenged twice (Moon's algorithm has to scavenge
+number of objects that are scavenged twice (Moon's algorithm may scavenge
 some objects more than once which is safe because scavenging is idempotent).
 \cite{Lam:1992}
 Siegwart and Hirzel further improved performance by adapting the algorithm for
@@ -229,7 +254,7 @@ Furthermore, in "Multicore Garbage Collection with Local Heaps", Marlow et al ta
 about an "allocation wall" where performance is capped by the rate new objects
 can be allocated in main memory.\cite{Marlow:2011} Hitting the "allocation wall" means your
 program will no longer run faster when given access to more cores. Marlow et al
-solves the problem by have a separate, cache-sized allocation area for each core.
+solves this problem by have a separate, cache-sized allocation area for each core.
 Objects allocated in these allocation areas may die and be garbage collected
 without ever leaving the CPU cache, freeing up main memory bandwidth for
 long-lived objects.
