@@ -30,7 +30,7 @@ optimizations against the baseline. These two novel techniques, as well as the
 detailed measurements of their effects, are the primary contributions of this
 report.
 
-\section{Jikes RVM vs. native}
+\section{Jikes RVM vs. GHC vs. native}
 \makecomment{Why I use a native GC rather than the Jikes RVM (Research Virtual Machine)
 to test my hypothesis even though a lot of other people use it.
 Answer: Haskell has different allocation patterns than Java*}
@@ -43,8 +43,8 @@ two optimizations will improve how the garbage collector interacts with the
 memory caches. As part of this work I want to answer the following questions:
 \begin{itemize}
   \item Is the implementation unreasonably complicated? Some previously proposed
-    systems have shown promise on a small scale but were too complicated to be
-    used outside of academia.\cite{GHCImmix}
+    systems have shown promise on a small scale but were too complicated to
+    gain widespread usage.\cite{GHCImmix}
   \item Are the optimizations beneficial and do the benefits outweigh the costs?
   \item Can the optimizations be ported to collectors used in industry?
 \end{itemize}
