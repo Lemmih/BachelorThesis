@@ -262,15 +262,27 @@ Objects allocated in these allocation areas may die and be garbage collected
 without ever leaving the CPU cache, freeing up main memory bandwidth for
 long-lived objects.
 
-\section{Region inference}
-
-
 \section{Haskell}
-\makecomment{Haskell is a purely functional language. Mutable objects are
-uncommon which leads to a high allocate rate (ie. in Haskell, you create new
-objects instead of mutating old ones. How many Haskellers does it take to
-change a broken light bulb? Zero. The light bulb is immutable. You just create
-a new house with a working light bulb.)}
+
+Haskell, as a purely functional programming language, model the behavior of
+functions like mathematical functions. That is, they are fixed mappings between
+domains: Call a function with the same argument and you'll always get the same
+result. Side-effects and mutable data are still possible through various means
+but their use is discouraged. Instead of mutating data, persistent data structures
+are "changed" by creating new copies and letting the garbage collector get rid of
+the old. Inserting a new node in a tree, for example, would create an entirely
+new tree. Since none of the data can be mutated, unmodified branches from the
+old tree can be reused in the new tree. Any fragment of the old tree that was
+not reused will be found by the garbage collector and deallocated. This style
+of programming enhances compartmentalization and makes it easier to reason about
+functions at the cost of a rate of data allocation not seen in other programming
+paradigms.
+
+Haskell does have implicit mutations caused by laziness, though. Assigning
+'1+1' to a variable does not have to perform any computations before the value
+of that variable is used. When the value is demanded, '1+1' is evaluated and
+the variable is mutated to the value of '2'. These kinds of implicit mutations
+tend to happen more frequently than explicit mutations.
 
 \section{GHC}
 \makecomment{Diagrams for this section: GHC's memory model, GHC's pipeline.}
