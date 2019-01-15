@@ -36,7 +36,9 @@ Jikes Research Virtual Machine is an environment for running Java programs
 and it provides an excellent platform for experimenting with new garbage
 collection techniques, called MMTk (Memory Management Toolkit).\cite{Blackburn:2004}
 While Jikes RVM has been the starting point of a lot of solid research, I've
-decided not to use it because Haskell\cite{HaskellReport} (a purely functional language) has
+decided not to use it because
+Haskell\footnote{Haskell 2010 Language Report: \url{https://www.haskell.org/onlinereport/haskell2010/}}
+ (a purely functional language) has
 different allocation patterns than Java (an object-oriented language).
 \cite{Blackburn:2008,Hertz05garbagecollection,Hertz:2005,mc2}
 Objects in purely functional languages tend to be smaller and allocated at a
@@ -58,7 +60,7 @@ memory caches. As part of this work I want to answer the following questions:
 \begin{itemize}
   \item Is the implementation unreasonably complicated? Some previously proposed
     systems have shown promise on a small scale but were too complicated to
-    gain widespread usage.\cite{GHCImmix}
+    gain widespread usage.\footnote{Immix Garbage Collector in GHC:\url{https://ghc.haskell.org/trac/ghc/wiki/Commentary/Rts/Storage/GC/Immix}}
   \item Are the optimizations beneficial and do the benefits outweigh the costs?
   \item Can the optimizations be ported to collectors used in industry?
 \end{itemize}
@@ -135,7 +137,8 @@ can be orders of magnitude faster.\cite{Chilimbi:1999,Eiron:1999}
 Still widely used in low-level languages and on embedded systems.
 The onus is on the user to ensure correct usage.
 Modern languages are usually garbage collected (8/10 most popular languages on
-github\cite{GithubLanguages} in 2017 were garbage collected).
+github\footnote{GitHub Octoverse: \url{https://octoverse.github.com/2017/}}
+in 2017 were garbage collected).
 Manual management has low overhead and can finalize objects immediately when
 they're no longer used. This is important for limited resources such as file
 handlers, file locks, etc.
@@ -263,7 +266,7 @@ long-lived objects.
 
 
 \section{Haskell}
-\makecomment{Haskell is a purely functional language.\cite{HaskellReport} Mutable objects are
+\makecomment{Haskell is a purely functional language. Mutable objects are
 uncommon which leads to a high allocate rate (ie. in Haskell, you create new
 objects instead of mutating old ones. How many Haskellers does it take to
 change a broken light bulb? Zero. The light bulb is immutable. You just create
@@ -600,8 +603,9 @@ How the runtime is split between the mutator and the garbage collector is
 measured using a high-precision clock with a resolution of 1ns. These runtime
 measurements are inherently stochastic and the benchmark suite is executed
 fives and only the median values are used.
-Hardware performance counter statistics are collected using the Linux \emph{perf}
-tool.\cite{perf} This tool is used to collect the number of page faults, cycles, instructions,
+Hardware performance counter statistics are collected using the Linux
+\emph{perf}\footnote{perf: Linux profiling with performance counters. \url{https://perf.wiki.kernel.org/index.php/Main_Page}}
+tool. This tool is used to collect the number of page faults, cycles, instructions,
 branches, branch misses, LLC (last-level cache) loads and LLC load misses. Again,
 these measurements are stochastic and the benchmark suite is executed five times
 and the median values are used.
