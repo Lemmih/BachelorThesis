@@ -147,6 +147,19 @@ but performs less well in terms of throughput and locality.
 
 \section{Reference counting}
 
+In the reference counting scheme, each allocated object is annotated with how
+many references point to it. Each time the number is used, this number
+increases. Once it hits zero, the object is deallocated and the reference
+count of all its children is decreased. A naive reference-counting garbage
+collector will run into problems with circular references and such cycles
+will never be deallocated, even when they're not reachable from the root-set
+anymore. It is however possible to combine reference counting with occasional
+tracing from the root-set to find and deallocate cycles.
+
+Predictable performance (even if not stellar) is a benefit of reference counting
+but the overhead of the per-object reference count can be significant. The
+garbage collection techniques presented below typically has better throughput
+performance.
 
 \section{Mark-and-sweep}
 \begin{figure}[b]
