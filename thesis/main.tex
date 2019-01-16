@@ -40,7 +40,7 @@ decided not to use it because
 Haskell\footnote{Haskell 2010 Language Report: \url{https://www.haskell.org/onlinereport/haskell2010/}}
  (a purely functional language) has
 different allocation patterns than Java (an object-oriented language).
-\cite{Blackburn:2008,Hertz05garbagecollection,Hertz:2005,mc2}
+\cite{Novark:2006,Blackburn:2008,Hertz:2005,mc2}
 Objects in purely functional languages tend to be smaller and allocated at a
 faster rate than objects in object-oriented languages.
 
@@ -330,8 +330,15 @@ their algorithms would be beneficial in situations where page-faults were
 particularly expensive. I believe that their research indicate that different
 copy orders can be worth it if their costs are kept minimal.
 
-\subsection{immix}
-\subsection{custom object layout (java)}
+\subsection{Custom Object Layout}
+
+Another approach all together is to allow custom
+data layouts for different data structures. Nowark et al used such a scheme to
+implement custom data layouts for tree maps, red-black trees, and splay trees,
+and saw a marked drop in both last-level cache misses as well as in total
+runtime.\cite{Novark:2006} This approach lets the authors of data types take
+advantage of their knowledge to predict how the data will be used and which
+layout would be most efficient.
 
 \chapter{Tail-copying and tail-compaction}
 
