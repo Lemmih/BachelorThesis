@@ -303,7 +303,33 @@ LLVM code, Similar memory model to GHC, Whole-program compiler.}
 details of tail-pointer elimination.}
 
 \section{Related work}
-\subsection{Depth-first copying (two approaches)}
+\subsection{Depth-first copying}
+
+In his 1984 paper, Moon wrote: "Depth-first copying generally yields better locality than
+breadth-first copying, because it tends to put components of a structure on the
+same page as the parent structure."
+\cite{Moon:1984}
+In order to quantify the locality benefits of depth-first copying,
+Hiroshi Nakashima and Takashi Chikayama implemented two algorithms for depth-first
+copying that were not limited by the amount of available stack space.\cite{Nakashima}
+The first
+algorithm, called the link method, reserves a single word in each allocated
+object. This space is then used to construct a linked-list of objects to be copied.
+If, for example, the algorithm encountered a branch in a binary tree, it'll push
+one node to the linked list and immediately copy the other. When the algorithm
+reaches a terminal node, it pops an object from the linked list and continues
+from there.
+Their other algorithm, called the reservation-stack method, is more conventional
+and reserves a section of the heap for the bookkeeping required for depth-first
+copying.
+
+The two algorithms were successful at significantly lowering the number of
+page-faults in their example program but came at the cost of increased memory
+usage and lower overall performance. Nakashima and Chikayama concluded that
+their algorithms would be beneficial in situations where page-faults were
+particularly expensive. I believe that their research indicate that different
+copy orders can be worth it if their costs are kept minimal.
+
 \subsection{immix}
 \subsection{custom object layout (java)}
 
@@ -460,8 +486,6 @@ to give accurate summary of how much time is spent in the mutator compared to
 the garbage collector.
 
 \subsection{Tail-first copy order}
-
-\makecomment{Diagram: Flow-chart of the new 'evacuate' procedure.}
 
 The copy order of the garbage collector is entirely determined by the 'evacuate'
 procedure in the algorithm outlined in \ref{algorithm}. This produce takes the
@@ -894,10 +918,10 @@ been solved.
 % decreased at 10\% per year.}
 % \cite{Chilimbi:1999}
 
-\blockquote{Careful placement of structure elements provides the mechanism to
-improve the cache locality of pointer manipulating programs and, consequently,
-their performance.}
-\cite{Chilimbi:1999}
+% \blockquote{Careful placement of structure elements provides the mechanism to
+% improve the cache locality of pointer manipulating programs and, consequently,
+% their performance.}
+% \cite{Chilimbi:1999}
 
 % Used
 % \blockquote{As processor speeds continue to improve relative to main-memory
@@ -909,10 +933,10 @@ their performance.}
 % while the speed of main-memory chips is improving only slowly.}
 % \cite{Reinhold:1994}
 
-\blockquote{In this paper, we propose two copying garbage collection methods.
-These two methods copy data structures in depth-first order, while conventional
-method copies in breadth-first order. This modification greatly improves memory
-access locality during both garbage collection and computation after.\cite{Nakashima:1995}}
+% \blockquote{In this paper, we propose two copying garbage collection methods.
+% These two methods copy data structures in depth-first order, while conventional
+% method copies in breadth-first order. This modification greatly improves memory
+% access locality during both garbage collection and computation after.\cite{Nakashima:1995}}
 
 % Used
 % \blockquote{In a computer with virtual memory both mark-and-sweep and
@@ -920,15 +944,15 @@ access locality during both garbage collection and computation after.\cite{Nakas
 % and may run slowly because of excessive page faulting.}
 % \cite{Chase:1987}
 
-\blockquote{The goal of hierarchical copying is to reduce cache and TLB misses
-by co-locating objects on the same cache line or page. [...] Paralle hierarchical
-copying reduce mutator misses on all measured levels of the memory subsystem:
-L1 data cache, combined L2 cache, and TLB.\cite{Siegwart:2006}}
+% \blockquote{The goal of hierarchical copying is to reduce cache and TLB misses
+% by co-locating objects on the same cache line or page. [...] Paralle hierarchical
+% copying reduce mutator misses on all measured levels of the memory subsystem:
+% L1 data cache, combined L2 cache, and TLB.\cite{Siegwart:2006}}
 
 
-\blockquote{Approximately depth-first copying improves the locality of
-data structures copied by the garbage collector.}
-\cite{Moon:1984}
+% \blockquote{Approximately depth-first copying improves the locality of
+% data structures copied by the garbage collector.}
+% \cite{Moon:1984}
 
 % Used
 % \blockquote{A copying garbage collector is free to choose the order in which
@@ -936,18 +960,18 @@ data structures copied by the garbage collector.}
 % copying related objects onto the same page.}
 % \cite{Moon:1984}
 
-\blockquote{A copying garbage collector can choose breadth-first copying or
-depth-first copying. The Cheney list-copying algorithm, which is traditionally
-used because it does not require any temporary storage (such as a stack), is
-breadth-first.\cite{Moon:1984}}
+% \blockquote{A copying garbage collector can choose breadth-first copying or
+% depth-first copying. The Cheney list-copying algorithm, which is traditionally
+% used because it does not require any temporary storage (such as a stack), is
+% breadth-first.\cite{Moon:1984}}
 
 
-\blockquote{Depth-first copying generally yields better locality than
-breadth-first copying, because it tends to put components of a structure on the
-same page as the parent structure.}
-\cite{Moon:1984}
+% \blockquote{Depth-first copying generally yields better locality than
+% breadth-first copying, because it tends to put components of a structure on the
+% same page as the parent structure.}
+% \cite{Moon:1984}
 
-\makecomment{Jikes RVM and MMtk are explained here.}\cite{Blackburn:2004}
+% \makecomment{Jikes RVM and MMtk are explained here.}\cite{Blackburn:2004}
 
 \blockquote{To reduce fragmentation in mark-region and other non-moving
 collectors, this paper introduces opportunistic defragmentation which mixes
