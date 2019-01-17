@@ -133,7 +133,7 @@ can be orders of magnitude faster.\cite{Chilimbi:1999,Eiron:1999}
 
 % Write about MESI and cache associativity
 
-\section{Manual memory management}
+\section{Manual memory management and reference counting}
 Manually allocating and deallocating memory is still widely used in low-level
 languages and on embedded systems. The onus is on the user to ensure correct
 usage, and failure to do so can lead to crashes, security breaches, or even
@@ -146,8 +146,6 @@ they're no longer used. This is important for limited resources such as file
 handlers, file locks, etc.
 Manual management often has more predictable performance without arbitrary pauses
 but performs less well in terms of throughput and locality.
-
-\section{Reference counting}
 
 In the reference counting scheme, each allocated object is annotated with how
 many references point to it. Each time the number is used, this number
