@@ -591,6 +591,13 @@ heaps.
   \label{modified_child}
 \end{figure}
 
+\begin{figure}[b]
+  \includesvg[height=3.5cm, inkscapelatex=false]{images/D4.svg}
+  \caption{Evacuation of parent only.}
+  \label{multiple_parents}
+\end{figure}
+
+
 The elimination of tail pointers is straight forward in the common case but there
 are two situations that add complexity: Firstly, objects are always mutated by
 replacing them with an indirection to a new object. In contrast to in-place updates,
@@ -644,13 +651,6 @@ leads to four new cases that need to be handled in the 'evacuate' procedure:
     and is now placed next to a different parent. Here a new tail-pointer has to
     be introduced between the parent and the child.
 \end{enumerate}
-
-\begin{figure}[b]
-  \includesvg[height=3.5cm, inkscapelatex=false]{images/D4.svg}
-  \caption{Evacuation of parent only.}
-  \label{multiple_parents}
-\end{figure}
-
 
 \begin{figure}
   \includesvg[height=3.5cm, inkscapelatex=false]{images/D1.svg}
@@ -970,7 +970,7 @@ word* _lhc_loadLast(word *ptr, word idx) {
 \chapter{Pointer distances}
 \label{pointer_distances}
 
-\begin{table}[t]
+\begin{table}[h]
   \hspace*{-1cm}\begin{minipage}{0.5\linewidth}
     \centering
     \caption{"Bush" pointer distances}
@@ -1005,8 +1005,8 @@ word* _lhc_loadLast(word *ptr, word idx) {
       \hline
     \end{tabular}}
   \end{minipage}
-\end{table}%
-\begin{table}
+\end{table}
+\begin{table}[h]
   \hspace*{-1cm}\begin{minipage}{0.5\linewidth}
     \centering
     \caption{"Imbalanced" pointer distances}
@@ -1041,7 +1041,7 @@ word* _lhc_loadLast(word *ptr, word idx) {
       \hline
     \end{tabular}}
   \end{minipage}
-\end{table}%
+\end{table}
 \begin{table}
     \centering
     \caption{"PowerSet" pointer distances}
