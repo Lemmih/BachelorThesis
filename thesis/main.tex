@@ -23,7 +23,7 @@ memory layout can hugely affect performance so the productivity advantages can
 come with efficiency disadvantages. Much research has been done not only to
 quantify this discrepancy but also to narrow the gap.
 
-In this thesis I will be looking at the memory layout of semi-space garbage
+In this thesis, I will be looking at the memory layout of semi-space garbage
 collector in the context of a purely functional programming language.
 I will implement two optimizations in the garbage collector and evaluate these
 optimizations against the baseline. These two novel techniques, as well as the
@@ -46,7 +46,7 @@ faster rate than objects in object-oriented languages.
 
 Furthermore, I will not be using the mature Haskell compiler, GHC, since the
 complexity of its runtime-system (which spans more than 100k lines of code)
-makes it difficult to modify and reason about. Instead I will use the LHC
+makes it difficult to modify and reason about. Instead, I will use the LHC
 compiler. It only supports a subset of the Haskell 2010 standard but its
 runtime-system is much smaller and more nimble. Key design choices of
 LHC (and how they differ from GHC's) are explained in chapter \ref{background}.
@@ -70,7 +70,7 @@ Chapter 2 goes over the current approaches to garbage collection, how people
 have tried to solve the problem in the past, and provides details about
 LHC which are required by the later chapters.
 Chapter 3 describes the design and implementation of the main contribution of
-this thesis, as well as the design and implementation of a further optimization
+this thesis, as well as the design and implementation of further optimization
 that follows as a direct consequence of the tail-copy technique.
 Chapter 4 evaluates these two new approaches against a baseline collector. This
 evaluation looks at deterministic factors which are proxies for performance.
@@ -90,7 +90,7 @@ Chapter 5 concludes the work and presents possible future work.
 
 CPUs used to run at similar frequencies as main memory, allowing them to read
 from memory at roughly the same speed that it could process the information.
-Sometimes programs has to process larger data sets than could fit into memory
+Sometimes programs have to process larger data sets than can fit into memory
 and parts of the data set would have to be swapped out of main memory and onto
 a disk or tape. A lot of caching research from that time was focused on how to
 manage the virtual memory using limited physical memory (which supports direct
@@ -114,7 +114,7 @@ constant amount of time because of the difference between a cache hit and
 a cache miss. Just as seen with spinning disks earlier, certain access patterns
 and data layouts can significantly improve performance.\cite{Chilimbi:1999}
 The canonical problems
-that highlights this is matrix multiplication: The elements of the resulting
+that highlight this is matrix multiplication: The elements of the resulting
 matrix can be computed in any order but choosing a cache-friendly access pattern
 can be orders of magnitude faster.\cite{Chilimbi:1999,Eiron:1999}
 
@@ -134,8 +134,10 @@ can be orders of magnitude faster.\cite{Chilimbi:1999,Eiron:1999}
 % Write about MESI and cache associativity
 
 \section{Manual memory management}
-Still widely used in low-level languages and on embedded systems.
-The onus is on the user to ensure correct usage.
+Manually allocating and deallocating memory is still widely used in low-level
+languages and on embedded systems. The onus is on the user to ensure correct
+usage, and failure to do so can lead to crashes, security breaches, or even
+performance problems.
 Modern languages are usually garbage collected (8/10 most popular languages on
 github\footnote{GitHub Octoverse: \url{https://octoverse.github.com/2017/}}
 in 2017 were garbage collected).
@@ -153,7 +155,7 @@ increases. Once it hits zero, the object is deallocated and the reference
 count of all its children is decreased. A naive reference-counting garbage
 collector will run into problems with circular references and such cycles
 will never be deallocated, even when they're not reachable from the root-set
-anymore. It is however possible to combine reference counting with occasional
+anymore. It is, however, possible to combine reference counting with occasional
 tracing from the root-set to find and deallocate cycles.
 
 Predictable performance (even if not stellar) is a benefit of reference counting
@@ -174,10 +176,10 @@ the heap allocated objects, tracing garbage collection involves finding all live
 heap objects by following a root set of objects out through all their children
 and children's children.\cite{Appel:1987} Once all the live objects have been found, unused memory
 and resources can be reclaimed.
-The mark-and-sweep does exactly this in two phases (illustrated in figure \ref{mark_and_sweep}): First all objects reachable
-from the root set are marked, then the "sweep" phases reclaims unused memory and
-releases unused OS resources. Unlike the "mark" phase, the time spent in the
-"sweep" phase is porportional to the total size of the heap, not just the number
+The mark-and-sweep does exactly this in two phases (illustrated in figure \ref{mark_and_sweep}):
+First all objects reachable from the root set are marked, then the "sweep" phases reclaim unused memory and
+release unused OS resources. Unlike the "mark" phase, the time spent in the
+"sweep" phase is proportional to the total size of the heap, not just the number
 of live objects.\cite{Wilson:1992}
 This algorithm correctly reclaims cyclic data structures when they're no longer
 referenced but, similarly to manual management and reference counting, leads to
