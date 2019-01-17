@@ -162,9 +162,9 @@ garbage collection techniques presented below typically has better throughput
 performance.
 
 \section{Mark-and-sweep}
-\begin{figure}[b]
+\begin{figure}
   \centering
-  \includesvg[width=0.8\linewidth,inkscapelatex=false]{images/D9.svg}
+  \includesvg[height=2cm,inkscapelatex=false]{images/D9.svg}
   \caption{Mark-and-Sweep.}
   \label{mark_and_sweep}
 \end{figure}
@@ -192,13 +192,14 @@ hurts any caching scheme, be it between memory and disk, or CPU and memory.\cite
 
 
 \section{Copying collectors}
-\begin{figure}
+
+\begin{figure}[b]
   \centering
   \includesvg[height=2cm,inkscapelatex=false]{images/D8.svg}
   \caption{Cheney's semi-space algorithm.}
   \label{cheney_algorithm}
 \end{figure}
-\begin{figure}[b]
+\begin{figure}
   \centering
   \includesvg[height=2cm,inkscapelatex=false]{images/D10.svg}
   \caption{Moon's algorithm.}
