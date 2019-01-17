@@ -213,7 +213,7 @@ is complete, all previously used memory will no longer contain live objects
 and can be reclaimed. This makes the "sweep" phases unnecessary and it gets rid
 of any fragmentation at the cost of requiring 2x available memory. The published
 algorithm used stack space to traverse and copy the heap objects which is
-undesirable since the stack space is limited and garbage collection will therefore
+undesirable since the stack space is limited and garbage collection will, therefore,
 fail if the heap grows too large. One year later, Cheney published a non-recursive
 algorithm for copying live objects and this algorithm has become the foundation
 for essentially all modern copying garbage collectors.\cite{Cheney:1970} Since the algorithm is
@@ -230,7 +230,7 @@ This
 different copy order affects cache performance but the effects weren't too pronounced
 with the architectures at the time and it wasn't until 1984 that Moon et al
 investigated the effect copy order has with virtual memory. And it wasn't until
-1995 that the effects of copy order was quantified in relationship to the
+1995 that the effects of copy order were quantified in relation to the
 CPU memory cache hierarchy by Nakashima and Chikayama.\cite{Nakashima:1995}
 
 As illustrated in figure \ref{moon_algorithm}, Moon modified Cheney's algorithm to have two scanning pointers instead of one.\cite{Moon:1984}
@@ -263,7 +263,7 @@ Since it's relatively rare for older objects to contain pointers to younger
 objects, only a small amount of bookkeeping is necessary to collect the minor
 generation without tracing through all the live objects in the major generation.\cite{Appel:1989}
 In other words, infant objects can be allocated and collected without tracing or
-copying long lived objects. This approach has proved so successful that, even
+copying long-lived objects. This approach has proved so successful that, even
 though the exact rate of infant mortality and object longevity varies from
 program to program, generational GC is the default in most popular garbage
 collected languages.
@@ -272,14 +272,14 @@ Furthermore, in "Multicore Garbage Collection with Local Heaps", Marlow et al ta
 about an "allocation wall" where performance is capped by the rate new objects
 can be allocated in main memory.\cite{Marlow:2011} Hitting the "allocation wall" means your
 program will no longer run faster when given access to more cores. Marlow et al
-solves this problem by have a separate, cache-sized allocation area for each core.
+solve this problem by having a separate, cache-sized allocation area for each core.
 Objects allocated in these allocation areas may die and be garbage collected
 without ever leaving the CPU cache, freeing up main memory bandwidth for
 long-lived objects.
 
 \section{Haskell}
 
-Haskell, as a purely functional programming language, model the behavior of
+Haskell, as a purely functional programming language, models the behavior of
 functions like mathematical functions. That is, they are fixed mappings between
 domains: Call a function with the same argument and you'll always get the same
 result. Side-effects and mutable data are still possible through various means
@@ -316,7 +316,7 @@ compiles a subset of the Haskell 2010 standard. The name of LHC is partly
 derived from the fact that the compiler generates
 LLVM\footnote{LLVM Language Reference Manual: \url{https://llvm.org/docs/LangRef.htm}}
 (Low-level Virtual Machine) IR code. It is not unique in this sense but, unlike
-the widely used haskell compiler GHC, LHC tries to generate very high level LLVM
+the widely used Haskell compiler GHC, LHC tries to generate very high-level LLVM
 IR code and actively tries to
 avoid duplicating optimizations that have already been implemented in the LLVM
 compilers.
@@ -337,7 +337,7 @@ laziness and higher-order functions. Objects (both data and suspended computatio
 are identified with a tag number defined at compile-time. Using a tag number
 rather than a pointer to an object description leaves more room for per-object
 metadata since tag numbers use fewer bits than pointers. Per-object metadata
-will play a instrumental role in the implementation of tail-compaction (described
+will play an instrumental role in the implementation of tail-compaction (described
 in section \ref{tail-compaction-section}).
 
 \section{Related work}
@@ -365,12 +365,12 @@ The two algorithms were successful at significantly lowering the number of
 page-faults in their example program but came at the cost of increased memory
 usage and lower overall performance. Nakashima and Chikayama concluded that
 their algorithms would be beneficial in situations where page-faults were
-particularly expensive. I believe that their research indicate that different
+particularly expensive. I believe that their research indicates that different
 copy orders can be worth it if their costs are kept minimal.
 
 \subsection{Custom Object Layout}
 
-Another approach all together is to allow custom
+Another approach altogether is to allow custom
 data layouts for different data structures. Nowark et al used such a scheme to
 implement custom data layouts for tree maps, red-black trees, and splay trees,
 and saw a marked drop in both last-level cache misses as well as in total
@@ -395,13 +395,13 @@ While it has been shown that tracing garbage collectors that use a depth-first
 copying algorithm have superior data locality, this technique is not used in any
 of the ten most popular languages on GitHub. The overheads in turns of memory
 usage and runtime performance are simply too great and the benefits only
-manifests themselves in niche situations (eg. with limited physical memory and
+manifest themselves in niche situations (eg. with limited physical memory and
 a high cost of page faults). However, I think a compromise is possible that
 maintains most of the data locality benefits without hampering performance in
 the common case, making such an algorithm suitable as the default garbage
 collector rather than just being useful in special cases.
 
-Between depth-first copying and breadth-first copying, there exist a middle-ground
+Between depth-first copying and breadth-first copying, there exists a middle-ground
 which I call tail-first copying. In this scheme, exactly one child of each node
 (the tail) is copied depth-first and the rest of the children (if there are any)
 are copied breadth-first. This has several potential benefits.
@@ -431,19 +431,19 @@ are copied breadth-first. This has several potential benefits.
 
 Tail-first copying in inherently optimistic as there are many situations that
 make it impossible to put a child node right after its parent. Each of these
-situations have to be detected and they add complexity as well as logic branches
+situations has to be detected and they add complexity as well as logic branches
 to the algorithm. There are three key cases to consider:
 \begin{enumerate}
   \item Multiple parents. Objects may have any number of parents but can only be
   placed next to one. In this case, the child would be placed next to the first
   parent and all subsequently traversed parents will be placed potentially far
-  away in memory. I don't believe this to be a big problem as, while having
+  away in memory. I don't believe this to be a big problem because, while having
   multiple is definitely not uncommon, the majority of objects should only have
   a single parent.
   \item
   Unlucky root set traversal. If object A is the parent of object B and the root
   set contains both objects, there's a chance that object B will be copied
-  (evacuated) before object A and it therefore cannot be placed immediately
+  (evacuated) before object A and it, therefore, cannot be placed immediately
   after object A. This should be a minor problem as root set traversals happen
   infrequently and the size of the root sets are fixed at compile-time.
   \item
@@ -454,7 +454,7 @@ to the algorithm. There are three key cases to consider:
   younger generations and due to techniques such as eager promotion (moving an
   object to an older generation if it has parents in that generation), data
   structures are rarely interspersed over many generations. Instead, chunks of
-  linked data tends to be located in the same generation, with possible links
+  linked data tend to be located in the same generation, with possible links
   to chunks of data in other generations. As such, I don't believe generational
   garbage collecting would significantly affect the behavior of tail-copying.
   That said, this report will focus exclusively on adding tail-copying to a
@@ -476,7 +476,7 @@ omitted from the object itself and instead calculated as $X+S$.
 If nothing else is changed, this compression of the heap would lead to a smaller
 allocation area (since the allocation area is sized as a multiple of the live heap
 size)
-and the garbage collector would therefore be invoked more frequently. On the other
+and the garbage collector would, therefore, be invoked more frequently. On the other
 hand, it is also possible to use the extra heap space to extend the allocation area
 which would make the garbage collector run less frequently. Both options have
 their uses, but, for the sake of comparing apples to apples, I've chosen the
@@ -485,7 +485,7 @@ collection strategies. This should make the heaps slightly smaller but keep the
 number of garbage collections the same.
 
 Switching between breadth-first, depth-first, and tail-first copy order does not
-change the semantic layout of the heap objects and this can therefore be done
+change the semantic layout of the heap objects and this can, therefore, be done
 without changing any other parts of the evaluator or the runtime system. In
 contrast, omitting the tail pointer \emph{does} change the memory model and
 all systems that interact with the heap objects will need to take it into
@@ -527,7 +527,7 @@ when new allocations have hit a certain limit:
 LHC's garbage collection API made it simple to implement the above algorithm
 without having to worry how the rest of the compiler is constructed.
 Additionally, the garbage collection API is timed with high-precision clocks
-to give accurate summary of how much time is spent in the mutator compared to
+to give an accurate summary of how much time is spent in the mutator compared to
 the garbage collector.
 
 \subsection{Tail-first copy order}
@@ -552,7 +552,7 @@ In some Haskell compilers, like GHC, indirections take up two words of memory
 trying to overwrite heap objects that are smaller than two words. Luckily, in
 LHC, indirections only take up a single word and no special precautions are
 necessary. LHC is able to squeeze an indirection into a single word because
-all heap objects are word aligned and pointers to them therefore don't use the
+all heap objects are word aligned and pointers to them, therefore, don't use the
 least significant 2 or 3 bits (for 32bit and 64bit systems, respectively).
 
 A key thing to note is that the 'evacuate' procedure only copies a single heap
@@ -565,7 +565,7 @@ it still wouldn't require the stack space that a depth-first copy does.
 
 Introducing a check for children to the procedure, and recursing if it is true,
 does not add a significant amount of complexity. However, it is important to
-verify that the procedure is indeed tail-recursive. Otherwise it'll use an
+verify that the procedure is indeed tail-recursive. Otherwise, it'll use an
 unbounded amount of stack space and undoubtedly fail for sufficiently large
 heaps.
 
@@ -606,7 +606,7 @@ that was previously eliminated will have to be restored.
 
 The tail-pointer elimination algorithm depends on whether the parent has a
 tail-pointer or not and whether the child has already been evacuated or not. This
-leads to four new cases that needs to be handled in the 'evacuate' procedure:
+leads to four new cases that need to be handled in the 'evacuate' procedure:
 \begin{enumerate}
   \item Parent and child both in \emph{from-space}. Figure \ref{parent_child}
     illustrates
@@ -696,7 +696,7 @@ The \emph{perf} tool supports other counters but this subset was chosen since
 each of these counters should something relevant to the performance of the two
 novel algorithms. Page faults (in this benchmark suite) are triggered when newly
 allocated memory is used for the first time. They find an unused page of physical
-memory and make sure its filled with zeros. This can be quite time consuming
+memory and make sure its filled with zeros. This can be fairly time consuming
 and much research has gone into reducing the number of page faults.\cite{Nakashima:1995,Chase:1987,Moon:1984,Grunwald:1993}
 The number of cycles is related to the number of instructions but seemingly
 innocent algorithmic changes can have unintuitive effects. With the right
@@ -805,9 +805,9 @@ PowerSet       &15.1 gb        &+0.0\%         &+0.0\%         \\
 
 
 The seven benchmark program used all have heap sizes measured in gigabytes,
-making it nigh impossible to visually inspect for verification. Fortunately
+making it nigh impossible to visually inspect for verification. Fortunately,
 there's a lot of aggregate data which can give us an indication of whether
-tail-copying and tail-compaction works as theorized in section \ref{concept_overview}.
+tail-copying and tail-compaction work as theorized in section \ref{concept_overview}.
 
 Table \ref{bintree_dist} and \ref{allocate_dist} show the pointer distances
 between parent and child objects, grouped into 6 buckets. Siegwart et al uses
@@ -886,7 +886,7 @@ cache-friendly manner but the gains are eaten by unpredictable branches.
 Using the heap size saving to increase the allocation area would be the easiest
 way of improving the performance of the tail-compaction strategy. A larger
 allocation area means fewer objects survive between each collection and the
-garbage collector therefore has less work to do and fewer objects to copy. Given
+garbage collector, therefore, has less work to do and fewer objects to copy. Given
 that the heap savings can be quite significant (8.3\% in the case of
 \emph{Allocate}), this might very well push the tail-compaction strategy from
 being a slight performance loss to being a slight performance gain.
@@ -894,7 +894,7 @@ being a slight performance loss to being a slight performance gain.
 It may also be possible to reduce the number of branch misses. The \emph{perf}
 tool identifies the 'evacuate' procedure as the culprit due to the radically
 different behavior that depends on whether a node can be compacted or not.
-Predicting this is difficult for the CPU but there \emph{are} patterns that can
+Predicting this is difficult for the CPU but there \emph{are} patterns that
 could be exploited. For example, compacted nodes usually appear in chains so
 if the algorithms find one compacted node then the next one is likely to also
 be compacted. Furthermore, only tail pointers are candidates for compaction.
