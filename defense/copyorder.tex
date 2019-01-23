@@ -1,0 +1,35 @@
+\begin{frame}
+  \frametitle{Depth-first copying}
+  \begin{figure}
+    \centering
+    \includesvg[width=6cm]{Depth-order.svg}
+  \end{figure}
+  \begin{center}
+    Each branch lives in continuous memory.
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Breadth-first copying}
+  \begin{figure}
+    \centering
+    \includesvg[width=6cm]{Breadth-order.svg}
+  \end{figure}
+  \pause
+  \begin{center}
+    No stack but poor locality of reference.
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{A middle ground: tail-first copying}
+  \visible<2->{\begin{figure}
+    \centering
+    \includesvg[width=6cm]{Tail-order.svg}
+  \end{figure}}
+  \begin{enumerate}
+    \item No stack
+    \item No reserved heap
+    \item Puts branches in \emph{chunks} of continuous memory
+  \end{enumerate}
+\end{frame}
