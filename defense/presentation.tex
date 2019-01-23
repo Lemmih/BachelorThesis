@@ -1,0 +1,70 @@
+\documentclass[12pt,t]{beamer}
+\usetheme[style=simple,nat,en]{Frederiksberg}
+\usepackage{pslatex}
+\usepackage{xmpmulti}
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{listings}
+\usepackage{xcolor}
+\usetikzlibrary{arrows,automata,fit}
+\usepackage{listings}% http://ctan.org/pkg/listings
+\usepackage{animate}
+\lstset{
+      basicstyle=\ttfamily,
+        mathescape
+    }
+% \setbeamercovered{transparent}
+
+\definecolor{bluekeywords}{rgb}{0,0,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{redstrings}{rgb}{0.64,0.08,0.08}
+\definecolor{xmlcomments}{rgb}{0.5,0.5,0.5}
+\definecolor{types}{rgb}{0.17,0.57,0.68}
+
+\lstset{language=[Sharp]C,
+captionpos=b,
+%numbers=left, %Nummerierung
+%numberstyle=\tiny, % kleine Zeilennummern
+frame=lines, % Oberhalb und unterhalb des Listings ist eine Linie
+showspaces=false,
+showtabs=false,
+breaklines=true,
+showstringspaces=false,
+breakatwhitespace=true,
+escapeinside={(*@}{@*)},
+commentstyle=\color{greencomments},
+morekeywords={partial, var, value, get, set},
+keywordstyle=\color{bluekeywords},
+stringstyle=\color{redstrings},
+basicstyle=\ttfamily\small,
+}
+
+
+\title{Cache optimizations in \\ Garbage Collection}
+\subtitle{Bachelor Thesis}
+\author{David Himmelstrup}
+\institute{Department of Computer Science}
+
+\begin{document}
+
+\frame[plain]{\titlepage}
+%\input{intro}
+\input{languages}
+
+%\input{states}
+%\input{physics}
+%\input{collision}
+%\input{points}
+%\input{layout}
+%\input{analysis}
+
+%\input{parse}
+%\input{parse_code}
+
+%\input{testing}
+%\input{improve}
+%\input{final}
+
+\end{document}

@@ -1,0 +1,10 @@
+\frametitle{Parser implementation}
+
+\begin{lstlisting}
+Name = Prefixed("Name: ", ExpectLine(lines));
+
+string platformsLine = Prefixed("Platforms: ", ExpectLine(lines));
+Platforms = platformsLine.Split(
+              new[] {", "},
+              StringSplitOptions.None);
+\end{lstlisting}
