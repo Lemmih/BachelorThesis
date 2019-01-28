@@ -75,3 +75,124 @@ basicstyle=\ttfamily\small,
 %\input{final}
 
 \end{document}
+
+
+
+% Hi, my name is David. Today I'll be talking about my bachelor work
+% on cache optimizations in a semi-space garbage collector.
+% My work started out with an idea that a garbage collector could,
+% in certain situations, arrange heap objects differently
+% in order to make better use of CPU caches. I'll explain the details shortly.
+% ------- FLIP SLIDE --------
+% In my bachelor project, I wanted not only to verify that my idea could make
+% a garbage collector faster but also to get an objective measure of its
+% implementation complexity and whether it could be expected to work in a
+% modern collector. You see, the garbage collector I'll be using as a baseline
+% is quite simple and doesn't support mutable objects and it is not generational.
+% ------- FLIP SLIDE --------
+% First a little background. Why are garbage collectors interesting? Well, of
+% the 10 most popular languages on GitHub,
+% ------- FLIP SLIDE --------
+% 8 of them are garbage collected. This usually means the programmers of these
+% languages do not get to decide precisely how their data is arranged in memory.
+% ------- FLIP SLIDE --------
+% Does this matter? Does it matter how data is arranged in memory? Isn't memory
+% random-access and therefore has a constant latency and bandwidt? It does matter
+% because the abstraction of random-access memory is leaky. Some memory requests
+% will be served from the cache, some from physical memory, others possibly from a swap
+% file on disk. Furthermore, the different layers have different chunk sizes.
+% Caches can be accessed word-by-word but physical memory is accessed in chunks
+% of usually 8 words at a time.
+% This means data arrangement has an effect on both data bandwidth
+% and data latency.
+% ------- FLIP SLIDE --------
+% The type of garbage collector I'll be working with is called a semi-space
+% garbage collector. The collector works by traversing live objects and copying
+% them to a separate space. It was first described by Fenichel who used a
+% depth-first algorithm to traverse the object graph. But depth-first traversal
+% requires stack space to keep track of which objects are yet to be copied and
+% this limited the possible size of the heap. One year later, Cheney realized
+% that a breadth-first algorithm could use the 'to-space' to keep track of which
+% objects to copy, thus supporting arbitrarily large heaps. This style of
+% garbage collection has become widely used,
+% especially among functional programming languages that allocate lots of
+% short-lived objects and require high garbage collection through-put.
+% ------- FLIP SLIDE --------
+% This figure shows in which order the objects are copied.
+% The move away from depth-first copying was a mixed blessing. CPU
+% caches make it several times cheaper to access objects if they're close
+% together and depth-first copying is really good at this, always placing
+% branches next to each other.
+% ------- FLIP SLIDE --------
+% Breadth-first copying, on the other hand, tends to intersperse data and put
+% unrelated objects together.
+% ------- FLIP SLIDE --------
+% For example, object 5 and 6 only share a grandparent but they're put right
+% next to each other. Even worse, if we add another branch to the
+% root node, that branch will be interpersed with the previous branches.
+% ------- FLIP SLIDE --------
+% Now we finally get to the first on my two ideas. Is there a way to traverse
+% the object graph which does not require any stack, which does not require
+% any reserved heap, and which has a higher likelihood of placing related
+% objects close together?
+% ------- FLIP SLIDE --------
+% It's possible to deeply copy a single branch of each node and then use
+% breadth-first copying for all the other branches without requiring any stack.
+% This leads to smaller chunks of continuous memory where objects have a parent
+% to child relation. This alone should improve performance in some situations.
+% ------- FLIP SLIDE --------
+% Now on to the second idea.
+% Given that many parent-child pairs are placed right next to each other, the
+% pointer between them contains no useful information and can be replaced by
+% a single tag bit. If the bit is set, the pointer is omitted and the child
+% must be right below the parent. This should save heap space and lead to less
+% copying.
+% There are several corner cases, such as objects with multiple parents or
+% objects that were copied before their parents, which must all be accounted
+% for.
+% ------- FLIP SLIDE --------
+% I've implemented these two ideas in the LHC Haskell Compiler and benchmarked
+% them with 7 test programs.
+% A key metric is last-level-cache misses. This is how often a memory request
+% has to go all the way to physical memory. Here, tail copying does extremely
+% well and only struggles slightly on two programs. Tail compaction is a marginal
+% improvement on top of this.
+% ------- FLIP SLIDE --------
+% Identifying the special cases where the two methods can be applied is not
+% free and there are three programs which are seriously hampered by failed
+% branch prediction. A branch miss will stall the CPU and can be as expensive
+% as a cache miss.
+% Interesting enough, tail-compaction has to check if a parent is compacted
+% before accessing the child. I thought this check would be expensive but
+% it turns out to be completely inconsequential. The CPU is able to predict
+% it well.
+% ------- FLIP SLIDE --------
+% One large benefit of tail compaction is that programs take up less space.
+% How much space is saved depends on the data and the allocation patterns
+% but it tends to be a significant amount. In the benchmarks, it saved 5 percent
+% on average.
+% It should be noted that I'm not using the saved space to make the collections
+% run faster. To get comparible results, each garbage collector has the same
+% allocation area and runs the same number of times.
+% ------- FLIP SLIDE --------
+% The total garbage collection time is influenced primarily by cache misses and
+% branch misses. As such, only three of the seven programs see an actual
+% performance gain. BinTree, Bush and BushTail are all held back for the same
+% reason: excessive number of branch misses.
+% Allocate is a bit of a special case with fewer
+% branch misses but more cache misses.
+% ------- FLIP SLIDE --------
+% Does the implementation have a reasonable complexity? Yes, it only take up
+% 10% of the RTS.
+% Is the performance improved? Only in some cases. In future work, it may be
+% possible to only
+% enable the optimizations for certain data types and thereby limit the
+% downsides. It's also possible to use the saved heap space to make collection
+% a little bit faster.
+% Can these optimizations be used in a modern collector? As it stands, I think
+% not.
+% Modern collectors support mutable objects and are often generational. Both
+% these things interfere with my two optimizations and would make the benefits
+% even less pronounced.
+
+%
